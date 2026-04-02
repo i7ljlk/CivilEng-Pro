@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبات الهندسة المدنية | CivilEng Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-helmet-safety"></i>
+                <h1>CivilEng <span>Pro</span></h1>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-target="dashboard-view">
+                    <i class="fa-solid fa-house"></i> <span data-i18n="nav-home">الرئيسية</span>
+                </a>
+                <a href="#" class="nav-item" data-target="brick-calc">
+                    <i class="fa-solid fa-cubes"></i> <span data-i18n="nav-brick">حاسبة الطوب</span>
+                </a>
+                <a href="#" class="nav-item" data-target="ceramic-calc">
+                    <i class="fa-solid fa-border-all"></i> <span data-i18n="nav-ceramic">حاسبة السيراميك</span>
+                </a>
+                <a href="#" class="nav-item" data-target="plaster-calc">
+                    <i class="fa-solid fa-trowel-bricks"></i> <span data-i18n="nav-plaster">حاسبة البياض (المساح)</span>
+                </a>
+                <a href="#" class="nav-item" data-target="excavation-calc">
+                    <i class="fa-solid fa-person-digging"></i> <span data-i18n="nav-excavation">حاسبة الحفريات</span>
+                </a>
+                <a href="#" class="nav-item" data-target="steel-calc">
+                    <i class="fa-solid fa-link"></i> <span data-i18n="nav-steel">حاسبة الحديد</span>
+                </a>
+                <a href="#" class="nav-item" data-target="concrete-calc">
+                    <i class="fa-solid fa-truck-monster"></i> <span data-i18n="nav-concrete">حاسبة الخرسانة والكميات</span>
+                </a>
+                <a href="#" class="nav-item" data-target="block-calc">
+                    <i class="fa-solid fa-cubes-stacked"></i> <span data-i18n="nav-block">حاسبة البلوك</span>
+                </a>
+                <a href="#" class="nav-item" data-target="history-calc">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="nav-history">سجل الحسابات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h2 id="page-title">الرئيسية</h2>
+                <div class="user-profile">
+                    <div class="avatar" onclick="toggleUserMenu(event)">
+                        <img src="owner.jpg" alt="المستخدم" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); pointer-events: none;">
+                    </div>
+                    <div class="user-dropdown" id="user-menu">
+                        <div class="dropdown-item" onclick="toggleTheme()">
+                            <i class="fa-solid fa-circle-half-stroke"></i>
+                            <span data-i18n="menu-theme">الوضع ليلي/نهاري</span>
+                        </div>
+                        <div class="dropdown-item" onclick="setLanguage('ar')">
+                            <span style="font-weight: bold; width: 20px;">AR</span>
+                            <span>العربية</span>
+                        </div>
+                        <div class="dropdown-item" onclick="setLanguage('en')">
+                            <span style="font-weight: bold; width: 20px;">EN</span>
+                            <span>English</span>
+                        </div>
+                        <div class="dropdown-item" onclick="setLanguage('ku')">
+                            <span style="font-weight: bold; width: 20px;">KU</span>
+                            <span>کوردی</span>
+                        </div>
+                        <a href="https://www.instagram.com/i7ss.n" target="_blank" class="dropdown-item">
+                            <i class="fa-brands fa-instagram"></i>
+                            <span>Instagram</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div class="calculator-container" id="dashboard-view">
+                <div class="glass-card">
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+                        <img src="owner.jpg" alt="المستخدم" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; border: 3px solid var(--primary); box-shadow: var(--shadow);">
+                        <div>
+                            <h2 style="margin-bottom: 0.2rem; color: var(--primary);" data-i18n="dash-welcome">مرحباً بك في CivilEng Pro</h2>
+                            <h3 style="color: white; font-weight: 500;" data-i18n="owner-name">المهندس حسن منذر</h3>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 2.5rem;" data-i18n="dash-subtitle">اختر إحدى الحاسبات الهندسية من القائمة الجانبية للبدء بحساب الكميات بدقة عالية.</p>
+                    
+                    <div class="input-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'brick-calc\']').click()">
+                            <i class="fa-solid fa-cubes" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5>حاسبة الطابوق</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'ceramic-calc\']').click()">
+                            <i class="fa-solid fa-border-all" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5>حاسبة السيراميك</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'concrete-calc\']').click()">
+                            <i class="fa-solid fa-truck-monster" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5>حاسبة الخرسانة</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'steel-calc\']').click()">
+                            <i class="fa-solid fa-link" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5>حاسبة الحديد</h5>
+                        </div>
+                    </div>
+
+                    <!-- About the Project Section -->
+                    <div style="margin-top: 3rem; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border-right: 4px solid var(--primary);">
+                        <h4 style="color: var(--primary); margin-bottom: 1rem;"><i class="fa-solid fa-circle-info"></i> نبذة عن تطبيق CivilEng Pro</h4>
+                        <p style="color: var(--text-light); line-height: 1.8; font-size: 1rem; text-align: justify;">
+                            يعتبر تطبيق <strong>CivilEng Pro</strong> أداة هندسية متكاملة تهدف إلى تسهيل العمليات الحسابية لمشاريع الهندسة المدنية والمقاولات. صُمم هذا التطبيق بواسطة <strong>المهندس حسن منذر</strong> ليكون منصة رقمية دقيقة تضمن حساب الكميات الإنشائية (مثل الطابوق، السيراميك، اللبخ، والحديد) بأعلى درجات الدقة الهندسية، مع مراعاة نسب الهدر والمواصفات القياسية المعمول بها عالمياً، مما يقلل من الأخطاء البشرية ويضمن كفاءة استخدام المواد في الموقع.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calculator-container" id="brick-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-calculator"></i> إدخال البيانات - الطابوق</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>نوع الحساب</label>
+                        <select id="brick-sub-mode" onchange="toggleBrickSubMode()">
+                            <option value="wall">حساب جدار واحد</option>
+                            <option value="room">حساب غرفة كاملة</option>
+                        </select>
+                    </div>
+
+                    <h4 style="color: var(--primary);">قياسات الطابوق (سم):</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الطول (سم)</label>
+                            <input type="number" id="brick-l" value="24" oninput="updateBrickNote()">
+                        </div>
+                        <div class="input-group">
+                            <label>العرض (سم)</label>
+                            <input type="number" id="brick-w" value="12" oninput="updateBrickNote()">
+                        </div>
+                        <div class="input-group">
+                            <label>الارتفاع (سم)</label>
+                            <input type="number" id="brick-h" value="8" oninput="updateBrickNote()">
+                        </div>
+                        <div class="input-group" id="grp-brick-mortar" style="display: none;">
+                            <label>سمك المونة (سم)</label>
+                            <input type="number" id="brick-mortar" value="1" oninput="updateBrickNote()">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر كل 4000 طابوقة (دينار)</label>
+                            <input type="number" id="brick-price" value="500000" placeholder="مثال: 500000">
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-circle-info" style="color: #2196f3;"></i>
+                        <span id="brick-note-text" style="font-size: 0.9rem; color: #2196f3; line-height: 1.4;">
+                            ملاحظة: بالأبعاد الافتراضية يُعتمد <b>450 طابوقة</b> للمتر المكعب (للجدار الحامل والغرفة - قانون الحجم)، و <b>53 طابوقة</b> للمتر المربع (للجدار القاطع - قانون المساحة).
+                        </span>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">قياسات الجدار / الغرفة:</h4>
+                    <div class="input-grid">
+                        <div class="input-group" id="grp-brick-room-w" style="display: none;">
+                            <label>عرض الغرفة (م)</label>
+                            <input type="number" id="brick-room-w" value="4">
+                        </div>
+                        <div class="input-group">
+                            <label id="lbl-brick-length">طول الجدار (م)</label>
+                            <input type="number" id="brick-wall-l" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع الجدار (م)</label>
+                            <input type="number" id="brick-wall-h" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>نوع الجدار (اختصار أبعاد)</label>
+                            <select onchange="document.getElementById('brick-wall-thick').value = this.value">
+                                <option value="0.25">جدار حامل - ربال (25 سم)</option>
+                                <option value="0.12">جدار قاطع - مسطح (12 سم)</option>
+                                <option value="0.36">جدار طابوقة ونصف (36 سم)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>سمك الجدار (م)</label>
+                            <input type="number" id="brick-wall-thick" value="0.25">
+                        </div>
+                        <div class="input-group" id="grp-brick-waste" style="display: none;">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="brick-waste" value="5">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">الفتحات (الأبواب والنوافذ):</h4>
+                    <p style="font-size: 0.9em; color: var(--text-muted);">سيتم حساب مساحة الفتحات وخصمها من الجدران تلقائياً.</p>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>عرض الباب (م)</label>
+                            <input type="number" id="brick-door-w" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع الباب (م)</label>
+                            <input type="number" id="brick-door-h" value="2.1">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد الأبواب</label>
+                            <input type="number" id="brick-door-count" value="1">
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>عرض الشباك (م)</label>
+                            <input type="number" id="brick-win-w" value="1.5">
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>ارتفاع الشباك (م)</label>
+                            <input type="number" id="brick-win-h" value="1.5">
+                        </div>
+                        <div class="input-group" style="margin-top: 10px;">
+                            <label>عدد الشبابيك</label>
+                            <input type="number" id="brick-win-count" value="1">
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>إضافة مساحة فتحات أخرى (م² - اختياري)</label>
+                        <input type="number" id="brick-openings-extra" value="0">
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateBrick()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    
+                    <div class="result-box" id="brick-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="brick-result-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ceramic Calculator -->
+            <div class="calculator-container" id="ceramic-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-border-all"></i> إدخال البيانات - السيراميك والبورسلين</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>طريقة الحساب</label>
+                        <select id="ceramic-sub-mode" onchange="toggleCeramicSubMode()">
+                            <option value="area">مساحة إجمالية جاهزة</option>
+                            <option value="wall">حساب جدار واحد</option>
+                            <option value="room">حساب غرفة كاملة (أرضية وجدران)</option>
+                        </select>
+                    </div>
+
+                    <h4 style="color: var(--primary);">أبعاد البلاطة (السيراميك):</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الطول (سم)</label>
+                            <input type="number" id="ceramic-l" value="60">
+                        </div>
+                        <div class="input-group">
+                            <label>العرض (سم)</label>
+                            <input type="number" id="ceramic-w" value="60">
+                        </div>
+                        <div class="input-group">
+                            <label>سمك المفصل/الترويبة (ملم)</label>
+                            <input type="number" id="ceramic-joint" value="2">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد البلاطات بالعلبة</label>
+                            <input type="number" id="ceramic-box-count" value="4">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر العلبة (دينار)</label>
+                            <input type="number" id="ceramic-price" placeholder="مثال: 15000">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="ceramic-waste" value="10">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">أبعاد البناء:</h4>
+                    <div class="input-grid">
+                        <div class="input-group" id="grp-ceramic-area">
+                            <label>المساحة الكلية المطلوبة (م²)</label>
+                            <input type="number" id="ceramic-area" placeholder="مثال: 50">
+                        </div>
+                        <div class="input-group" id="grp-ceramic-wall-l" style="display:none;">
+                            <label id="lbl-ceramic-length">طول الجدار / الغرفة (م)</label>
+                            <input type="number" id="ceramic-wall-l" value="4">
+                        </div>
+                        <div class="input-group" id="grp-ceramic-room-w" style="display:none;">
+                            <label>عرض الغرفة (م)</label>
+                            <input type="number" id="ceramic-room-w" value="4">
+                        </div>
+                        <div class="input-group" id="grp-ceramic-wall-h" style="display:none;">
+                            <label>الارتفاع (م)</label>
+                            <input type="number" id="ceramic-wall-h" value="3">
+                        </div>
+                    </div>
+
+                    <div id="grp-ceramic-openings" style="display:none;">
+                        <h4 style="color: var(--primary); margin-top: 1.5rem;">الفتحات (الأبواب والنوافذ لخصمها من السيراميك):</h4>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>عرض الباب (م)</label>
+                                <input type="number" id="ceramic-door-w" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>ارتفاع الباب (م)</label>
+                                <input type="number" id="ceramic-door-h" value="2.1">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الأبواب</label>
+                                <input type="number" id="ceramic-door-count" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>عرض الشباك (م)</label>
+                                <input type="number" id="ceramic-win-w" value="1.5">
+                            </div>
+                            <div class="input-group">
+                                <label>ارتفاع الشباك (م)</label>
+                                <input type="number" id="ceramic-win-h" value="1.5">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الشبابيك</label>
+                                <input type="number" id="ceramic-win-count" value="1">
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-top: 15px;">
+                            <label>مساحة فتحات إضافية أخرى (م² - اختياري)</label>
+                            <input type="number" id="ceramic-openings-extra" value="0">
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; margin-top: 1rem;">
+                        <i class="fa-solid fa-circle-info" style="color: #2196f3;"></i>
+                        <span style="font-size: 0.9rem; color: #2196f3;">ملاحظة: سمك المفصل يضاف تلقائياً لحجم البلاطة عند الحساب.</span>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateCeramic()">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    
+                    <div class="result-box" id="ceramic-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="ceramic-result-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Plaster Calculator -->
+             <div class="calculator-container" id="plaster-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-trowel-bricks"></i> إدخال البيانات - البياض (اللبخ / الجص)</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>نوع المادة</label>
+                        <select id="plaster-material" onchange="togglePlasterMaterial()">
+                            <option value="labakh">اللبخ (سمنت ورمل)</option>
+                            <option value="gypsum">الجص</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>نوع الحساب</label>
+                        <select id="plaster-sub-mode" onchange="togglePlasterMode()">
+                            <option value="wall">المساحة الإجمالية (جدار)</option>
+                            <option value="room">حساب غرفة كاملة (سقف + جدران)</option>
+                        </select>
+                    </div>
+
+                    <h4 style="color: var(--primary);">قياسات العمل:</h4>
+                    <div class="input-grid">
+                        <div class="input-group" id="grp-plaster-room-len" style="display: none;">
+                            <label>طول الغرفة (م)</label>
+                            <input type="number" id="plaster-room-len" placeholder="مثال: 5">
+                        </div>
+                        <div class="input-group" id="grp-plaster-room-width" style="display: none;">
+                            <label>عرض الغرفة (م)</label>
+                            <input type="number" id="plaster-room-width" placeholder="مثال: 4">
+                        </div>
+                        <div class="input-group" id="grp-plaster-wall-len">
+                            <label>طول الجدار (م)</label>
+                            <input type="number" id="plaster-wall-len" placeholder="مثال: 5">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع الجدار (م)</label>
+                            <input type="number" id="plaster-wall-height" placeholder="مثال: 3">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر المتر المربع (عمل/مواد)</label>
+                            <input type="number" id="plaster-price" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="plaster-waste" value="5">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;" id="plaster-material-title">تكوين اللبخ (سمنت ورمل):</h4>
+                    <div class="input-grid" id="grp-plaster-labakh">
+                        <div class="input-group">
+                            <label>سمك اللبخ (متر)</label>
+                            <input type="number" id="plaster-thick" value="0.02" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة السمنت</label>
+                            <input type="number" id="plaster-cement-ratio" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الرمل</label>
+                            <input type="number" id="plaster-sand-ratio" value="3">
+                        </div>
+                    </div>
+
+                    <div class="input-grid" id="grp-plaster-gypsum" style="display: none;">
+                        <div class="input-group">
+                            <label>سمك الجص (متر)</label>
+                            <input type="number" id="gypsum-thick" value="0.02" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>كثافة الجص (كغم/م³)</label>
+                            <input type="number" id="gypsum-density" value="1000">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة التعويض/الفقدان (%)</label>
+                            <input type="number" id="gypsum-loss" value="10">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">الفتحات (تخصم 100% ويُحسب لها لبخ الجوانب):</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>البعد الداخلي عن الجدار (م) لحساب الجوانب</label>
+                            <input type="number" id="plaster-wall-thick" value="0.25">
+                        </div>
+                        <div class="input-group">
+                            <label>عرض الباب (م)</label>
+                            <input type="number" id="plaster-door-w" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع الباب (م)</label>
+                            <input type="number" id="plaster-door-h" value="2.1">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد الأبواب</label>
+                            <input type="number" id="plaster-door-count" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label>عرض الشباك (م)</label>
+                            <input type="number" id="plaster-win-w" value="1.5">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع الشباك (م)</label>
+                            <input type="number" id="plaster-win-h" value="1.5">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد الشبابيك</label>
+                            <input type="number" id="plaster-win-count" value="1">
+                        </div>
+                    </div>
+                    <div class="input-grid" style="margin-top: 15px;">
+                        <div class="input-group">
+                            <label>مساحة فتحات إضافية (م² - للخصم)</label>
+                            <input type="number" id="plaster-openings-extra" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>إضافة مساحة جوانب إضافية (م² - للجمع)</label>
+                            <input type="number" id="plaster-reveals-extra" value="0">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculatePlaster()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    
+                    <div class="result-box" id="plaster-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="plaster-result-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excavation Calculator -->
+            <div class="calculator-container" id="excavation-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-person-digging"></i> إدخال البيانات - الحفريات الخاصة بالأساسات</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>نوع الأساس (طريقة الحساب)</label>
+                        <select id="exc-mode" onchange="toggleExcavationMode()">
+                            <option value="normal">حفر مساحة عادية (طول × عرض × عمق)</option>
+                            <option value="strip">حفر أساس شريطي (جدران متقاطعة)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-grid" id="exc-normal-mode">
+                        <div class="input-group">
+                            <label>الطول (متر)</label>
+                            <input type="number" id="exc-length" placeholder="مثال: 20">
+                        </div>
+                        <div class="input-group">
+                            <label>العرض (متر)</label>
+                            <input type="number" id="exc-width" placeholder="مثال: 15">
+                        </div>
+                    </div>
+
+                    <div id="exc-strip-mode" style="display: none;">
+                        <h4 style="color: var(--primary); margin-bottom: 1rem;">إضافة جدران الأساس:</h4>
+                        <div class="input-grid" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 1rem;">
+                            <div class="input-group">
+                                <label>طول الجدار (متر)</label>
+                                <input type="number" id="exc-wall-l" placeholder="مثال: 5">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد التكرار</label>
+                                <input type="number" id="exc-wall-count" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>اتجاه الجدار</label>
+                                <select id="exc-wall-dir">
+                                    <option value="h">أفقي (Horizontal)</option>
+                                    <option value="v">عمودي (Vertical)</option>
+                                </select>
+                            </div>
+                            <div class="input-group" style="justify-content: flex-end;">
+                                <button class="btn-primary" onclick="addExcWall()" style="width: 100%; height: 45px; margin-top: 1.8rem;">إضافة جدار <i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div id="exc-wall-list" style="margin-bottom: 1.5rem;">
+                            <!-- Walls will appear here -->
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">الأبعاد المشتركة:</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>عمق الحفر (متر)</label>
+                            <input type="number" id="exc-depth" placeholder="مثال: 1.5">
+                        </div>
+                        <div class="input-group" id="exc-w-shared" style="display: none;">
+                            <label>عرض الأساس (متر)</label>
+                            <input type="number" id="exc-width-shared" placeholder="مثال: 1.2">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر المتر المكعب للحفر/الردم</label>
+                            <input type="number" id="exc-price" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر للتخمين (%)</label>
+                            <input type="number" id="exc-waste" value="5">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateExcavation()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    
+                    <div class="result-box" id="excavation-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="excavation-result-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Steel Calculator (Comprehensive) -->
+            <div class="calculator-container" id="steel-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-link"></i> حاسبة الحديد</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label>نوع الحساب</label>
+                        <select id="steel-mode" onchange="toggleSteelModes()">
+                            <option value="1">أساس حصيري / سقف</option>
+                            <option value="2">أساس شريطي / جسور</option>
+                            <option value="3">عمود</option>
+                            <option value="4">كانات الأعمدة</option>
+                        </select>
+                    </div>
+
+                    <!-- Mode 1: Mat / Slab -->
+                    <div id="steel-mode-1" class="steel-sub-mode">
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>طول الاتجاه الطويل (م)</label>
+                                <input type="number" id="st1-length" placeholder="مثال: 10" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label>طول الاتجاه القصير (م)</label>
+                                <input type="number" id="st1-width" placeholder="مثال: 5" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label>معامل الأوفر لاب (Ø)</label>
+                                <input type="number" id="st1-overlap" value="60" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>المسافة بين الشيش (م)</label>
+                                <input type="number" id="st1-spacing" value="0.20" step="0.01">
+                            </div>
+                            <div class="input-group">
+                                <label>الغطاء الخرساني/الكفر (م)</label>
+                                <input type="number" id="st1-cover" value="0.05" step="0.01">
+                            </div>
+                            <div class="input-group">
+                                <label>قطر الشيش (مم)</label>
+                                <input type="number" id="st1-diameter" value="12" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الحصيرات</label>
+                                <input type="number" id="st1-layers" value="2" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الأسياخ في الطن الواحد (اختياري)</label>
+                                <input type="number" id="st1-bars-per-ton" placeholder="يُحسب آلياً إذا ترك فارغاً" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>نسبة الهدر (%)</label>
+                                <input type="number" id="st1-waste" value="5" step="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mode 2: Strip Foundation / Beams -->
+                    <div id="steel-mode-2" class="steel-sub-mode" style="display: none;">
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <label>طول الأساس الكامل (م)</label>
+                            <input type="number" id="st2-length" placeholder="مثال: 50" step="0.1">
+                            <small style="color: #94A3B8; margin-top: 5px; display: block; font-weight: bold;">ملاحظة: طول الأساس الكامل هو مجموع المسافات الأفقية والعمودية للغرف ومحتويات المخطط</small>
+                        </div>
+                        
+                        <h4 style="color: var(--primary); margin: 1.5rem 0 1rem;">إعدادات التسليح (النوع الأول):</h4>
+                        <div class="input-grid">
+                            <div class="input-group"><label>عدد الأشياش (1)</label><input type="number" id="st2-count1" value="4"></div>
+                            <div class="input-group"><label>قطر الشيش (1)</label><input type="number" id="st2-dia1" value="16"></div>
+                        </div>
+                        
+                        <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px; margin: 1rem 0;">
+                            <input type="checkbox" id="st2-use-dual" onchange="document.getElementById('st2-dual-grid').style.display = this.checked ? 'grid' : 'none';" style="width: auto;">
+                            <label>إضافة نوع حديد آخر؟</label>
+                        </div>
+
+                        <div id="st2-dual-grid" style="display: none;">
+                            <h4 style="color: var(--primary); margin: 0.5rem 0 1rem;">إعدادات التسليح (النوع الثاني):</h4>
+                            <div class="input-grid" style="margin-bottom: 1rem;">
+                                <div class="input-group"><label>عدد الأشياش (2)</label><input type="number" id="st2-count2" value="2"></div>
+                                <div class="input-group"><label>قطر الشيش (2)</label><input type="number" id="st2-dia2" value="12"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <label>عدد الأسياخ في الطن الواحد (اختياري)</label>
+                            <input type="number" id="st2-bars-per-ton" placeholder="يُحسب آلياً">
+                        </div>
+
+                        <h4 style="color: var(--primary); margin: 1.5rem 0 1rem;">إعدادات أشاير الدرج:</h4>
+                        <div class="input-grid">
+                            <div class="input-group"><label>معامل الأوفر لاب (Ø) - (مثلاً 60)</label><input type="number" id="st2-overlap" value="60"></div>
+                            <div class="input-group"><label>عدد أشاير الدرج</label><input type="number" id="st2-stair-count" value="0"></div>
+                            <div class="input-group"><label>نسبة الهدر (%)</label><input type="number" id="st2-waste" value="5"></div>
+                        </div>
+
+                        <h4 style="color: var(--primary); margin: 1.5rem 0 1rem;">إعدادات الأتاري (الكانات):</h4>
+                        <div class="input-grid">
+                            <div class="input-group"><label>المسافة بين الأتاري (م)</label><input type="number" id="st2-stirrup-spacing" value="0.20"></div>
+                            <div class="input-group"><label>قطر الأتاري (مم)</label><input type="number" id="st2-stirrup-dia" value="8"></div>
+                            <div class="input-group"><label>العرض B (م)</label><input type="number" id="st2-width" value="0.25"></div>
+                            <div class="input-group"><label>الارتفاع H (م)</label><input type="number" id="st2-height" value="0.55"></div>
+                            <div class="input-group"><label>الغطاء C (م)</label><input type="number" id="st2-cover" value="0.05"></div>
+                            <div class="input-group"><label>الكروشة (م)</label><input type="number" id="st2-hook" value="0.10"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mode 3: Column -->
+                    <div id="steel-mode-3" class="steel-sub-mode" style="display: none;">
+                         <div class="input-grid">
+                            <div class="input-group"><label>ارتفاع الدول (م)</label><input type="number" id="st3-dol" value="1.0"></div>
+                            <div class="input-group"><label>سمك السقف (م)</label><input type="number" id="st3-slab" value="0.20"></div>
+                            <div class="input-group"><label>ارتفاع الطابق (م)</label><input type="number" id="st3-floor" value="3.0"></div>
+                            <div class="input-group"><label>قطر الشيش (مم)</label><input type="number" id="st3-dia" value="16"></div>
+                            <div class="input-group"><label>عدد الشياش للعمودالواحد</label><input type="number" id="st3-count" value="6"></div>
+                            <div class="input-group"><label>عدد الأعمدة</label><input type="number" id="st3-cols" value="1"></div>
+                            <div class="input-group"><label>وزن المتر الطولي (كغم/م) - اختياري</label><input type="number" id="st3-weight-per-m" placeholder="آلي"></div>
+                         </div>
+                    </div>
+
+                    <!-- Mode 4: Stirrups -->
+                    <div id="steel-mode-4" class="steel-sub-mode" style="display: none;">
+                         <div class="input-grid">
+                            <div class="input-group"><label>ارتفاع العمود (م)</label><input type="number" id="st4-length" value="3.0"></div>
+                            <div class="input-group"><label>المسافة بين الكانات (م)</label><input type="number" id="st4-spacing" value="0.20"></div>
+                            <div class="input-group"><label>قطر الكانة (مم)</label><input type="number" id="st4-dia" value="8"></div>
+                         </div>
+                         <h4 style="color: var(--primary); margin: 1.5rem 0 1rem;">أبعاد المقطع الخرساني للعمود:</h4>
+                         <div class="input-grid">
+                            <div class="input-group"><label>العرض B (م)</label><input type="number" id="st4-b" value="0.25"></div>
+                            <div class="input-group"><label>العمق H (م)</label><input type="number" id="st4-h" value="0.50"></div>
+                            <div class="input-group"><label>الغطاء الكفر C (م)</label><input type="number" id="st4-cover" value="0.05"></div>
+                            <div class="input-group"><label>طول الكروشات (م)</label><input type="number" id="st4-hook" value="0.10"></div>
+                            <div class="input-group"><label>نسبة الهدر (%)</label><input type="number" id="st4-waste" value="5"></div>
+                         </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateSteelComprehensive()">احسب الحديد <i class="fa-solid fa-arrow-left"></i></button>
+
+                    <div class="result-box" id="steel-comp-result" style="display: none;">
+                        <h4>النتائج الإجمالية والنهائية</h4>
+                        <div class="result-grid" id="steel-comp-grid">
+                           <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Concrete / Quantity Calculator -->
+             <div class="calculator-container" id="concrete-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-truck-monster"></i> حاسبة الخرسانة والكميات</h3>
+                    
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الطول (م)</label>
+                            <input type="number" id="conc-length" placeholder="مثال: 10">
+                        </div>
+                        <div class="input-group">
+                            <label>العرض (م)</label>
+                            <input type="number" id="conc-width" placeholder="مثال: 10">
+                        </div>
+                        <div class="input-group">
+                            <label>السمك (م)</label>
+                            <input type="number" id="conc-thick" placeholder="مثال: 0.20">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة السمنت</label>
+                            <input type="number" id="conc-cement-r" value="1" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الرمل</label>
+                            <input type="number" id="conc-sand-r" value="2" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الحصى</label>
+                            <input type="number" id="conc-gravel-r" value="4" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="conc-waste" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label>السعر للمتر المكعب (اختياري)</label>
+                            <input type="number" id="conc-price" placeholder="مثال: 90000">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateConcrete()">احسب الكميات الخرسانية <i class="fa-solid fa-arrow-left"></i></button>
+
+                    <div class="result-box" id="concrete-result" style="display: none;">
+                        <h4>نتائج تحليل الخرسانة</h4>
+                        <div class="result-grid" id="concrete-result-grid">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Block Calculator -->
+             <div class="calculator-container" id="block-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-cubes-stacked"></i> حاسبة البلوك</h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>طريقة الحساب</label>
+                        <select id="block-sub-mode" onchange="toggleBlockSubMode()">
+                            <option value="area">مساحة إجمالية جاهزة</option>
+                            <option value="wall">حساب جدار واحد</option>
+                            <option value="room">حساب غرفة كاملة (جدران فقط)</option>
+                        </select>
+                    </div>
+
+                    <h4 style="color: var(--primary);">أبعاد البلوكة (سم):</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>طول البلوكة (سم)</label>
+                            <input type="number" id="block-L" value="40">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع البلوكة (سم)</label>
+                            <input type="number" id="block-H" value="20">
+                        </div>
+                        <div class="input-group">
+                            <label>سمك المونة (ملم)</label>
+                            <input type="number" id="block-mortar" value="10">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر البلوكة (دينار)</label>
+                            <input type="number" id="block-price" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="block-waste" value="10">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">أبعاد البناء:</h4>
+                    <div class="input-grid">
+                        <div class="input-group" id="grp-block-area">
+                            <label>المساحة الكلية المطلوبة (م²)</label>
+                            <input type="number" id="block-area" placeholder="مثال: 50">
+                        </div>
+                        <div class="input-group" id="grp-block-wall-L" style="display:none;">
+                            <label id="lbl-block-length">طول الجدار / الغرفة (م)</label>
+                            <input type="number" id="block-wall-l" value="5">
+                        </div>
+                        <div class="input-group" id="grp-block-room-W" style="display:none;">
+                            <label>عرض الغرفة (م)</label>
+                            <input type="number" id="block-room-w" value="4">
+                        </div>
+                        <div class="input-group" id="grp-block-wall-H" style="display:none;">
+                            <label>ارتفاع الجدار (م)</label>
+                            <input type="number" id="block-wall-h" value="3">
+                        </div>
+                    </div>
+
+                    <div id="grp-block-openings" style="display:none;">
+                        <h4 style="color: var(--primary); margin-top: 1.5rem;">الفتحات (الأبواب والنوافذ لخصمها من البلوك):</h4>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label>عرض الباب (م)</label>
+                                <input type="number" id="block-door-w" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>ارتفاع الباب (م)</label>
+                                <input type="number" id="block-door-h" value="2.1">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الأبواب</label>
+                                <input type="number" id="block-door-count" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>عرض الشباك (م)</label>
+                                <input type="number" id="block-win-w" value="1.5">
+                            </div>
+                            <div class="input-group">
+                                <label>ارتفاع الشباك (م)</label>
+                                <input type="number" id="block-win-h" value="1.5">
+                            </div>
+                            <div class="input-group">
+                                <label>عدد الشبابيك</label>
+                                <input type="number" id="block-win-count" value="1">
+                            </div>
+                        </div>
+                        <div class="input-group" style="margin-top: 15px;">
+                            <label>مساحة فتحات إضافية أخرى (م² - اختياري)</label>
+                            <input type="number" id="block-openings-extra" value="0">
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; margin-top: 1rem;">
+                        <i class="fa-solid fa-circle-info" style="color: #2196f3;"></i>
+                        <span style="font-size: 0.9rem; color: #2196f3;">ملاحظة: يتم استبعاد المساحات المفتوحة من مساحة البلوك الإجمالية.</span>
+                    </div>
+
+                    <button class="btn-primary" onclick="calculateBlock()">احسب البلوك <i class="fa-solid fa-arrow-left"></i></button>
+
+                    <div class="result-box" id="block-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="block-result-grid">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- History Section -->
+            <div class="calculator-container" id="history-calc" style="display: none;">
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> سجل الحسابات السابقة</h3>
+                        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="clearHistory()">مسح السجل</button>
+                    </div>
+                    
+                    <div id="history-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Items injected here via JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
