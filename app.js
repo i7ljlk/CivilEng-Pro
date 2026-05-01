@@ -30,9 +30,25 @@ const formatNum = (num) => {
     return Number(num.toFixed(3)).toLocaleString();
 };
 
+const parseArabicNum = (str) => {
+    if (!str) return NaN;
+    // Replace Arabic numerals with English numerals
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    let englishStr = String(str);
+    for (let i = 0; i < 10; i++) {
+        englishStr = englishStr.split(arabicNumbers[i]).join(i.toString());
+    }
+    // Replace Arabic comma with dot
+    englishStr = englishStr.replace('،', '.');
+    return parseFloat(englishStr);
+};
+
 const getVal = (id, def = 0) => {
-    const v = document.getElementById(id).value;
-    return (v === "" || isNaN(parseFloat(v))) ? def : parseFloat(v);
+    const el = document.getElementById(id);
+    if (!el) return def;
+    const v = el.value;
+    const parsed = parseArabicNum(v);
+    return (v === "" || isNaN(parsed)) ? def : parsed;
 };
 
 /* --- Brick Calculator --- */
@@ -60,24 +76,42 @@ function updateBrickNote() {
 
 function toggleBrickSubMode() {
     const mode = document.getElementById('brick-sub-mode').value;
+    const lbl = document.getElementById('lbl-brick-length');
+    const roomGrp = document.getElementById('grp-brick-room-w');
+    
     if (mode === 'wall') {
-        document.getElementById('lbl-brick-length').textContent = 'طول الجدار (م)';
-        document.getElementById('grp-brick-room-w').style.display = 'none';
-    } else {
-        document.getElementById('lbl-brick-length').textContent = 'طول الغرفة (م)';
-        document.getElementById('grp-brick-room-w').style.display = 'block';
+        lbl.textContent = 'طول الجدار (م)';
+        roomGrp.style.display = 'none';
+    } else if (mode === 'room') {
+        lbl.textContent = 'طول الغرفة (م)';
+        roomGrp.style.display = 'block';
+    } else if (mode === 'half_circle' || mode === 'quarter_circle') {
+        lbl.textContent = 'نصف القطر (م)';
+        roomGrp.style.display = 'none';
+    } else if (mode === 'total_lengths') {
+        lbl.textContent = 'مجموع الأطوال (م)';
+        roomGrp.style.display = 'none';
+    } else if (mode === 'volume') {
+        lbl.textContent = 'الحجم المعلوم (م³)';
+        roomGrp.style.display = 'none';
+        document.getElementById('grp-brick-vol').style.display = 'block';
     }
+    
+    if (mode !== 'volume') {
+        document.getElementById('grp-brick-vol').style.display = 'none';
+    }
+    
     document.getElementById('brick-result').style.display = 'none';
 }
 
 function calculateBrick() {
     const subMode = document.getElementById('brick-sub-mode').value;
     
-    const brickL = parseFloat(document.getElementById('brick-l').value) || 24;
-    const brickW = parseFloat(document.getElementById('brick-w').value) || 12;
-    const brickH = parseFloat(document.getElementById('brick-h').value) || 8;
-    const mortar = parseFloat(document.getElementById('brick-mortar').value) || 1;
-    const price = parseFloat(document.getElementById('brick-price').value) || 500000;
+    const brickL = getVal('brick-l', 24);
+    const brickW = getVal('brick-w', 12);
+    const brickH = getVal('brick-h', 8);
+    const mortar = getVal('brick-mortar', 1);
+    const price = getVal('brick-price', 500000);
     
     const wallL = getVal('brick-wall-l', 0);
     const wallH = getVal('brick-wall-h', 0);
@@ -85,32 +119,49 @@ function calculateBrick() {
     const waste = getVal('brick-waste', 5);
 
     // Calculate Openings Area
-    const doorW = parseFloat(document.getElementById('brick-door-w').value) || 0;
-    const doorH = parseFloat(document.getElementById('brick-door-h').value) || 0;
-    const doorCount = parseFloat(document.getElementById('brick-door-count').value) || 0;
+    const doorW = getVal('brick-door-w', 0);
+    const doorH = getVal('brick-door-h', 0);
+    const doorCount = getVal('brick-door-count', 0);
     
-    const winW = parseFloat(document.getElementById('brick-win-w').value) || 0;
-    const winH = parseFloat(document.getElementById('brick-win-h').value) || 0;
-    const winCount = parseFloat(document.getElementById('brick-win-count').value) || 0;
+    const winW = getVal('brick-win-w', 0);
+    const winH = getVal('brick-win-h', 0);
+    const winCount = getVal('brick-win-count', 0);
 
-    const openingsExtra = parseFloat(document.getElementById('brick-openings-extra').value) || 0;
+    const openingsExtra = getVal('brick-openings-extra', 0);
 
     const openingsArea = (doorW * doorH * doorCount) + (winW * winH * winCount) + openingsExtra;
 
     let wallArea = 0;
     if (subMode === 'wall') {
         wallArea = wallL * wallH;
-    } else {
-        const roomW = parseFloat(document.getElementById('brick-room-w').value) || 0;
+    } else if (subMode === 'room') {
+        const roomW = getVal('brick-room-w', 0);
         wallArea = 2 * (wallL + roomW) * wallH;
+    } else if (subMode === 'half_circle') {
+        const actualL = wallL * Math.PI;
+        wallArea = actualL * wallH;
+    } else if (subMode === 'quarter_circle') {
+        const actualL = wallL * Math.PI / 2;
+        wallArea = actualL * wallH;
+    } else if (subMode === 'total_lengths') {
+        wallArea = wallL * wallH;
+    } else if (subMode === 'volume') {
+        const volumeVal = getVal('brick-vol', 0);
+        wallArea = volumeVal / wallThick; // Working backwards for area-based logic if needed, but we'll use volume directly
     }
 
-    const netArea = wallArea - openingsArea;
+    let netArea = wallArea - openingsArea;
+    if (subMode === 'volume') {
+        // In volume mode, we ignore openings area unless specifically provided as extra volume to subtract
+        netArea = wallArea; 
+    }
+
     if (netArea < 0) {
         alert("مساحة الفتحات أكبر من مساحة الجدران!");
         return;
     }
-    if (wallArea <= 0) return;
+    if (wallArea <= 0 && subMode !== 'volume') return;
+    if (subMode === 'volume' && getVal('brick-vol', 0) <= 0) return;
 
     let bricksPerSqm = 0;
     let bricksPerCubicM = 0;
@@ -139,9 +190,17 @@ function calculateBrick() {
         methodUsed = `قانون المساحة (جدار قاطع)<br><small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">تم اعتماد معدل ${isDefault ? '53' : Math.ceil(bricksPerSqm)} طابوقة لكل 1 متر مربع بناءً على الأبعاد${isDefault ? ' الافتراضية' : ' المدخلة'}</small>`;
     } else {
         // Load-bearing Wall or Room -> Volume Law
-        const netVolume = netArea * wallThick;
-        rawBricks = netVolume * bricksPerCubicM;
-        const modeText = subMode === 'room' ? 'غرفة كاملة' : 'جدار حامل';
+        let modeText = 'جدار حامل';
+        if (subMode === 'room') modeText = 'غرفة كاملة';
+        else if (subMode === 'half_circle') modeText = 'نصف دائرة';
+        else if (subMode === 'quarter_circle') modeText = 'ربع دائرة';
+        else if (subMode === 'total_lengths') modeText = 'مجموع أطوال';
+        else if (subMode === 'volume') modeText = 'حجم معلوم';
+
+        let targetVolume = netArea * wallThick;
+        if (subMode === 'volume') targetVolume = getVal('brick-vol', 0);
+        
+        rawBricks = targetVolume * bricksPerCubicM;
         methodUsed = `قانون الحجم (${modeText})<br><small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">تم اعتماد معدل ${isDefault ? '450' : Math.ceil(bricksPerCubicM)} طابوقة لكل 1 متر مكعب بناءً على الأبعاد${isDefault ? ' الافتراضية' : ' المدخلة'}</small>`;
     }
 
@@ -171,6 +230,33 @@ function calculateBrick() {
             <h5>المساحة الصافية</h5>
             <span class="res-value">${formatNum(netArea)}</span>
             <span class="res-unit">م²</span>
+        </div>
+    `;
+
+    // Add Cement and Sand Estimation
+    let netVolume = (subMode === 'volume') ? getVal('brick-vol', 0) : (netArea * wallThick);
+    const cementBags = Math.ceil(netVolume * 0.11 * (1000 / 50)); // Approx 0.11 m3 mortar per m3 building, etc.
+    // Standard rule: 1m3 building bricks needs ~0.25m3 mortar. 
+    // 1m3 mortar (1:3) needs ~450kg cement (~9 bags) and 1.1m3 sand.
+    // So 1m3 building needs ~0.25 * 9 = 2.25 bags.
+    const estCement = Math.ceil(netVolume * 2.25);
+    const estSand = netVolume * 0.25;
+
+    html += `
+        <div class="result-item">
+            <h5>مكعب البناء الصافي</h5>
+            <span class="res-value">${formatNum(netVolume)}</span>
+            <span class="res-unit">م³</span>
+        </div>
+        <div class="result-item">
+            <h5>الأسمنت التقديري</h5>
+            <span class="res-value">${estCement}</span>
+            <span class="res-unit">كيس</span>
+        </div>
+        <div class="result-item">
+            <h5>الرمل التقديري</h5>
+            <span class="res-value">${formatNum(estSand)}</span>
+            <span class="res-unit">م³</span>
         </div>
     `;
 
@@ -230,28 +316,28 @@ function calculateCeramic() {
     let openingsArea = 0;
 
     if (subMode === 'area') {
-        area = parseFloat(document.getElementById('ceramic-area').value) || 0;
+        area = getVal('ceramic-area', 0);
     } else {
-        const wallH = parseFloat(document.getElementById('ceramic-wall-h').value) || 0;
-        const wallL = parseFloat(document.getElementById('ceramic-wall-l').value) || 0;
+        const wallH = getVal('ceramic-wall-h', 0);
+        const wallL = getVal('ceramic-wall-l', 0);
         
         let grossArea = 0;
         if (subMode === 'wall') {
             grossArea = wallL * wallH;
         } else if (subMode === 'room') {
-            const roomW = parseFloat(document.getElementById('ceramic-room-w').value) || 0;
+            const roomW = getVal('ceramic-room-w', 0);
             // Floor area + walls area
             grossArea = (wallL * roomW) + (2 * (wallL + roomW) * wallH);
         }
 
-        const doorW = parseFloat(document.getElementById('ceramic-door-w').value) || 0;
-        const doorH = parseFloat(document.getElementById('ceramic-door-h').value) || 0;
-        const doorCount = parseFloat(document.getElementById('ceramic-door-count').value) || 0;
+        const doorW = getVal('ceramic-door-w', 0);
+        const doorH = getVal('ceramic-door-h', 0);
+        const doorCount = getVal('ceramic-door-count', 0);
         
-        const winW = parseFloat(document.getElementById('ceramic-win-w').value) || 0;
-        const winH = parseFloat(document.getElementById('ceramic-win-h').value) || 0;
-        const winCount = parseFloat(document.getElementById('ceramic-win-count').value) || 0;
-        const extraOp = parseFloat(document.getElementById('ceramic-openings-extra').value) || 0;
+        const winW = getVal('ceramic-win-w', 0);
+        const winH = getVal('ceramic-win-h', 0);
+        const winCount = getVal('ceramic-win-count', 0);
+        const extraOp = getVal('ceramic-openings-extra', 0);
 
         openingsArea = (doorW * doorH * doorCount) + (winW * winH * winCount) + extraOp;
         area = grossArea - openingsArea;
@@ -262,9 +348,9 @@ function calculateCeramic() {
         }
     }
 
-    const l = parseFloat(document.getElementById('ceramic-l').value) || 0;
-    const w = parseFloat(document.getElementById('ceramic-w').value) || 0;
-    const tilesPerBox = parseInt(document.getElementById('ceramic-box-count').value) || 4;
+    const l = getVal('ceramic-l', 0);
+    const w = getVal('ceramic-w', 0);
+    const tilesPerBox = getVal('ceramic-box-count', 4);
     const price = getVal('ceramic-price', 0);
     const waste = getVal('ceramic-waste', 10);
     const jointMm = getVal('ceramic-joint', 2);
@@ -351,22 +437,22 @@ function togglePlasterMode() {
 function calculatePlaster() {
     const material = document.getElementById('plaster-material').value;
     const subMode = document.getElementById('plaster-sub-mode').value;
-    const wallH = parseFloat(document.getElementById('plaster-wall-height').value) || 0;
+    const wallH = getVal('plaster-wall-height', 0);
     const price = getVal('plaster-price', 0);
     const waste = getVal('plaster-waste', 5);
     
     // Auto-calculate Openings and Reveals
     const wallThick = getVal('plaster-wall-thick', 0.25);
-    const doorW = parseFloat(document.getElementById('plaster-door-w').value) || 0;
-    const doorH = parseFloat(document.getElementById('plaster-door-h').value) || 0;
-    const doorCount = parseFloat(document.getElementById('plaster-door-count').value) || 0;
+    const doorW = getVal('plaster-door-w', 0);
+    const doorH = getVal('plaster-door-h', 0);
+    const doorCount = getVal('plaster-door-count', 0);
     
-    const winW = parseFloat(document.getElementById('plaster-win-w').value) || 0;
-    const winH = parseFloat(document.getElementById('plaster-win-h').value) || 0;
-    const winCount = parseFloat(document.getElementById('plaster-win-count').value) || 0;
+    const winW = getVal('plaster-win-w', 0);
+    const winH = getVal('plaster-win-h', 0);
+    const winCount = getVal('plaster-win-count', 0);
 
-    const opExtra = parseFloat(document.getElementById('plaster-openings-extra').value) || 0;
-    const revExtra = parseFloat(document.getElementById('plaster-reveals-extra').value) || 0;
+    const opExtra = getVal('plaster-openings-extra', 0);
+    const revExtra = getVal('plaster-reveals-extra', 0);
 
     let openingsArea = (doorW * doorH * doorCount) + (winW * winH * winCount) + opExtra;
     let revealsArea = revExtra;
@@ -386,11 +472,11 @@ function calculatePlaster() {
     let grossArea = 0;
     let roomPerimeter = 0;
     if (subMode === 'wall') {
-        const wallL = parseFloat(document.getElementById('plaster-wall-len').value) || 0;
+        const wallL = getVal('plaster-wall-len', 0);
         grossArea = wallL * wallH;
     } else {
-        const roomL = parseFloat(document.getElementById('plaster-room-len').value) || 0;
-        const roomW = parseFloat(document.getElementById('plaster-room-width').value) || 0;
+        const roomL = getVal('plaster-room-len', 0);
+        const roomW = getVal('plaster-room-width', 0);
         roomPerimeter = 2 * (roomL + roomW);
         
         if (material === 'gypsum') {
@@ -431,9 +517,9 @@ function calculatePlaster() {
             <div class="result-item"><h5>المساحة مع الهدر (${waste}%)</h5><span class="res-value">${formatNum(areaWithWaste)}</span><span class="res-unit">م²</span></div>
         `;
 
-        const thick = parseFloat(document.getElementById('plaster-thick').value) || 0.02;
-        const rC = parseFloat(document.getElementById('plaster-cement-ratio').value) || 1;
-        const rS = parseFloat(document.getElementById('plaster-sand-ratio').value) || 3;
+        const thick = getVal('plaster-thick', 0.02);
+        const rC = getVal('plaster-cement-ratio', 1);
+        const rS = getVal('plaster-sand-ratio', 3);
         
         if (thick > 0 && (rC + rS) > 0) {
             const mortarVol = areaWithWaste * thick;
@@ -449,9 +535,9 @@ function calculatePlaster() {
         }
     } else {
         // Gypsum primary: Weight in Ton
-        const thick = parseFloat(document.getElementById('gypsum-thick').value) || 0.02;
-        const density = parseFloat(document.getElementById('gypsum-density').value) || 1000;
-        const loss = parseFloat(document.getElementById('gypsum-loss').value) || 10;
+        const thick = getVal('gypsum-thick', 0.02);
+        const density = getVal('gypsum-density', 1000);
+        const loss = getVal('gypsum-loss', 10);
         
         if (thick > 0 && density > 0) {
             const factor = (100 - loss) > 0 ? (100 / (100 - loss)) : 1.0;
@@ -501,8 +587,8 @@ function toggleExcavationMode() {
 }
 
 function addExcWall() {
-    const l = parseFloat(document.getElementById('exc-wall-l').value) || 0;
-    const count = parseInt(document.getElementById('exc-wall-count').value) || 1;
+    const l = getVal('exc-wall-l', 0);
+    const count = getVal('exc-wall-count', 1);
     const dir = document.getElementById('exc-wall-dir').value;
 
     if (l <= 0 || count <= 0) {
@@ -554,8 +640,8 @@ function calculateExcavation() {
     let extraHtml = '';
 
     if (mode === 'normal') {
-        const l = parseFloat(document.getElementById('exc-length').value) || 0;
-        const w = parseFloat(document.getElementById('exc-width').value) || 0;
+        const l = getVal('exc-length', 0);
+        const w = getVal('exc-width', 0);
         
         if (l <= 0 || w <= 0) {
             alert("يرجى إدخال الطول والعرض بشكل صحيح");
@@ -564,7 +650,7 @@ function calculateExcavation() {
         
         vol = l * w * d;
     } else {
-        const w = parseFloat(document.getElementById('exc-width-shared').value) || 0;
+        const w = getVal('exc-width-shared', 0);
         if (w <= 0) {
             alert("يرجى إدخال عرض الأساس بشكل صحيح");
             return;
@@ -664,17 +750,22 @@ function calculateSteelComprehensive() {
     let totalBarsCount = 0;
     let wastePercent = 0;
     let gridHtml = '';
+    let mainCalcName = "حساب الحديد";
+
+    const getWeightPerM = (d) => (d * d) / 162;
 
     if (mode === '1') {
-        const L = parseFloat(document.getElementById('st1-length').value) || 0;
-        const W = parseFloat(document.getElementById('st1-width').value) || 0;
-        const spacing = parseFloat(document.getElementById('st1-spacing').value) || 0;
-        const cover = parseFloat(document.getElementById('st1-cover').value) || 0;
-        const d = parseFloat(document.getElementById('st1-diameter').value) || 0;
-        const layers = parseFloat(document.getElementById('st1-layers').value) || 0;
+        mainCalcName = "أساس حصيري / سقف";
+        const L = getVal('st1-length', 0);
+        const W = getVal('st1-width', 0);
+        const spacing = getVal('st1-spacing', 0);
+        const cover = getVal('st1-cover', 0);
+        const d = getVal('st1-diameter', 0);
+        const layers = getVal('st1-layers', 0);
         const manualBarsPerTon = getVal('st1-bars-per-ton', 0);
         wastePercent = getVal('st1-waste', 5);
-        const overlapCoeff = parseFloat(document.getElementById('st1-overlap').value) || 60;
+        const overlapCoeff = getVal('st1-overlap', 60);
+        const projectType = document.getElementById('st1-project-type').value;
 
         if (spacing === 0) return;
 
@@ -687,41 +778,58 @@ function calculateSteelComprehensive() {
         const stdBarsLong = Math.ceil(lengthLongTotal / 12);
 
         const lapLen = (overlapCoeff * d) / 1000;
-        const lapTotalLen = countLong * lapLen;
+        const lapTotalLen = (countLong + countShort) * lapLen; 
         const slabOverlapStdBars = Math.ceil(lapTotalLen / 12);
 
         const barsPerTon = manualBarsPerTon > 0 ? manualBarsPerTon : getBarsPerTon(d);
-        const weightPerMeter = (d * d) / 162;
-        let slabOverlapWeightVal = 0, weightShort = 0, weightLong = 0;
+        const weightPerMeter = getWeightPerM(d);
 
         if (barsPerTon > 0) {
-            slabOverlapWeightVal = slabOverlapStdBars / barsPerTon;
-            weightShort = stdBarsShort / barsPerTon;
-            weightLong = stdBarsLong / barsPerTon;
+            const slabOverlapWeightVal = slabOverlapStdBars / barsPerTon;
+            const weightShort = stdBarsShort / barsPerTon;
+            const weightLong = stdBarsLong / barsPerTon;
             resultWeight = (weightShort + weightLong + slabOverlapWeightVal) * layers;
             totalBarsCount = (stdBarsShort + stdBarsLong + slabOverlapStdBars) * layers;
         } else {
-            slabOverlapWeightVal = (lapTotalLen * weightPerMeter) / 1000;
-            weightShort = (lengthShortTotal * weightPerMeter) / 1000;
-            weightLong = (lengthLongTotal * weightPerMeter) / 1000;
+            const slabOverlapWeightVal = (lapTotalLen * weightPerMeter) / 1000;
+            const weightShort = (lengthShortTotal * weightPerMeter) / 1000;
+            const weightLong = (lengthLongTotal * weightPerMeter) / 1000;
             resultWeight = (weightShort + weightLong + slabOverlapWeightVal) * layers;
             totalBarsCount = Math.ceil((lengthShortTotal + lengthLongTotal + lapTotalLen) / 12) * layers;
         }
 
-        gridHtml += `
-            <div class="result-item"><h5>الشيش الستندر - قصير</h5><span class="res-value">${stdBarsShort}</span><span class="res-unit">شيش</span></div>
-            <div class="result-item"><h5>الشيش الستندر - طويل</h5><span class="res-value">${stdBarsLong}</span><span class="res-unit">شيش</span></div>
+        let beamCoeff = 0.333;
+        if (projectType === 'normal') beamCoeff = 0.35;
+        else if (projectType === 'heavy') beamCoeff = 0.50;
+
+        const raftBeamWeight = resultWeight * beamCoeff;
+        const raftStirrupWeight = raftBeamWeight / 3;
+        
+        const finalWeightNet = resultWeight + raftBeamWeight + raftStirrupWeight;
+        const finalWeightWithWaste = finalWeightNet * (1 + wastePercent / 100);
+
+        gridHtml = `
+            <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); color: white;">
+                <h5 style="color: white; opacity: 0.9;">الوزن الإجمالي المطلوب (مع الهدر)</h5>
+                <span class="res-value" style="color: white;">${formatNum(finalWeightWithWaste)}</span>
+                <span class="res-unit" style="color: white;">طن</span>
+            </div>
+            <div class="result-item"><h5>وزن الحصيرات الصافي (${layers} طبقات)</h5><span class="res-value">${formatNum(resultWeight)}</span><span class="res-unit">طن</span></div>
+            <div class="result-item"><h5>وزن العوارض (تقديري)</h5><span class="res-value">${formatNum(raftBeamWeight)}</span><span class="res-unit">طن</span></div>
+            <div class="result-item"><h5>وزن الأتاري (تقديري)</h5><span class="res-value">${formatNum(raftStirrupWeight)}</span><span class="res-unit">طن</span></div>
+            <div class="result-item"><h5>إجمالي عدد الأشياش (12م)</h5><span class="res-value">${totalBarsCount}</span><span class="res-unit">شيش</span></div>
         `;
     } 
     else if (mode === '2') {
-        const length = parseFloat(document.getElementById('st2-length').value) || 0;
+        mainCalcName = "أساس شريطي / جسور";
+        const length = getVal('st2-length', 0);
         const count1 = getVal('st2-count1', 0);
         const d = getVal('st2-dia1', 0);
         const useDual = document.getElementById('st2-use-dual').checked;
         const manualBarsPerTon = getVal('st2-bars-per-ton', 0);
         wastePercent = getVal('st2-waste', 5);
 
-        const weightPerMeter = (d * d) / 162;
+        const weightPerMeter = getWeightPerM(d);
         const totalLen1 = length * count1;
         const stdBarsLong = Math.ceil(totalLen1 / 12);
         const barsPerTon1 = manualBarsPerTon > 0 ? manualBarsPerTon : getBarsPerTon(d);
@@ -730,31 +838,31 @@ function calculateSteelComprehensive() {
         let beamTotalStdBars = stdBarsLong;
 
         if (useDual) {
-            const dDual = parseFloat(document.getElementById('st2-dia2').value) || 0;
-            const count2 = parseInt(document.getElementById('st2-count2').value) || 0;
+            const dDual = getVal('st2-dia2', 0);
+            const count2 = getVal('st2-count2', 0);
             const totalLen2 = length * count2;
             const stdBarsDual = Math.ceil(totalLen2 / 12);
             const barsPerTon2 = manualBarsPerTon > 0 ? manualBarsPerTon : getBarsPerTon(dDual);
             
-            let weight2 = barsPerTon2 > 0 ? (stdBarsDual / barsPerTon2) : (totalLen2 * ((dDual * dDual) / 162) / 1000);
+            let weight2 = barsPerTon2 > 0 ? (stdBarsDual / barsPerTon2) : (totalLen2 * getWeightPerM(dDual) / 1000);
             beamWeightVal += weight2;
             beamTotalStdBars += stdBarsDual;
         }
 
-        const overlapCoeff = parseFloat(document.getElementById('st2-overlap').value) || 60;
-        const stairCount = parseInt(document.getElementById('st2-stair-count').value) || 0;
+        const overlapCoeff = getVal('st2-overlap', 60);
+        const stairCount = getVal('st2-stair-count', 0);
         const stairLapLenVal = (overlapCoeff * d) / 1000;
         const totalLenAshOneSide = stairCount * stairLapLenVal;
         const stdBarsAshOneSide = Math.ceil(totalLenAshOneSide / 12);
         
         let stairWeightVal = barsPerTon1 > 0 ? (stdBarsAshOneSide / barsPerTon1) * 2 : (totalLenAshOneSide * 2 * weightPerMeter / 1000);
 
-        const sSpacing = parseFloat(document.getElementById('st2-stirrup-spacing').value) || 0;
-        const sDiam = parseFloat(document.getElementById('st2-stirrup-dia').value) || 0;
-        const bWidth = parseFloat(document.getElementById('st2-width').value) || 0;
-        const bHeight = parseFloat(document.getElementById('st2-height').value) || 0;
-        const sCover = parseFloat(document.getElementById('st2-cover').value) || 0;
-        const sHook = parseFloat(document.getElementById('st2-hook').value) || 0;
+        const sSpacing = getVal('st2-stirrup-spacing', 0);
+        const sDiam = getVal('st2-stirrup-dia', 0);
+        const bWidth = getVal('st2-width', 0);
+        const bHeight = getVal('st2-height', 0);
+        const sCover = getVal('st2-cover', 0);
+        const sHook = getVal('st2-hook', 0);
 
         let sStdBars = 0;
         let stirrupsWeight = 0;
@@ -763,94 +871,90 @@ function calculateSteelComprehensive() {
             const stirrupPerimeterVal = 2 * ((bWidth - 2 * sCover) + (bHeight - 2 * sCover)) + (2 * sHook);
             const sTotalLen = stirrupsPieceCount * stirrupPerimeterVal;
             sStdBars = Math.ceil(sTotalLen / 12);
-
             const sBarsPerTon = getBarsPerTon(sDiam);
-            if (sBarsPerTon > 0) {
-                stirrupsWeight = sStdBars / sBarsPerTon;
-            } else {
-                stirrupsWeight = sTotalLen * ((sDiam * sDiam) / 162) / 1000;
-            }
+            stirrupsWeight = sBarsPerTon > 0 ? (sStdBars / sBarsPerTon) : (sTotalLen * getWeightPerM(sDiam) / 1000);
         }
 
         resultWeight = beamWeightVal + stairWeightVal + stirrupsWeight;
-        totalBarsCount = beamTotalStdBars + stdBarsAshOneSide + Math.floor(sStdBars);
+        totalBarsCount = beamTotalStdBars + stdBarsAshOneSide + sStdBars;
+
+        gridHtml = `
+            <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); color: white;">
+                <h5 style="color: white; opacity: 0.9;">الوزن الإجمالي مع الهدر (${wastePercent}%)</h5>
+                <span class="res-value" style="color: white;">${formatNum(resultWeight * (1 + wastePercent/100))}</span>
+                <span class="res-unit" style="color: white;">طن</span>
+            </div>
+            <div class="result-item"><h5>وزن الحديد الطولي</h5><span class="res-value">${formatNum(beamWeightVal)}</span><span class="res-unit">طن</span></div>
+            <div class="result-item"><h5>وزن الأتاري</h5><span class="res-value">${formatNum(stirrupsWeight)}</span><span class="res-unit">طن</span></div>
+            <div class="result-item"><h5>وزن أشاير الدرج</h5><span class="res-value">${formatNum(stairWeightVal)}</span><span class="res-unit">طن</span></div>
+        `;
     }
     else if (mode === '3') {
-        const dol = parseFloat(document.getElementById('st3-dol').value) || 0;
-        const slab = parseFloat(document.getElementById('st3-slab').value) || 0;
-        const floor = parseFloat(document.getElementById('st3-floor').value) || 0;
+        mainCalcName = "تسليح الأعمدة";
+        const dol = getVal('st3-dol', 0);
+        const slab = getVal('st3-slab', 0);
+        const floor = getVal('st3-floor', 0);
         const height = dol + slab + floor;
-        const count = parseInt(document.getElementById('st3-count').value) || 0;
-        const numColumns = parseInt(document.getElementById('st3-cols').value) || 1;
-        const d = parseFloat(document.getElementById('st3-dia').value) || 0;
-        const manualWM = parseFloat(document.getElementById('st3-weight-per-m').value) || 0;
+        const count = getVal('st3-count', 0);
+        const numColumns = getVal('st3-cols', 1);
+        const d = getVal('st3-dia', 0);
+        const manualWM = getVal('st3-weight-per-m', 0);
+        const effectiveW = manualWM > 0 ? manualWM : getWeightPerM(d);
 
-        const weightPerMeter = (d * d) / 162;
-        const effectiveW = manualWM > 0 ? manualWM : weightPerMeter;
+        resultWeight = (height * count * numColumns * effectiveW) / 1000;
+        totalBarsCount = count * numColumns;
 
-        const columnTotalBarsCount = count * numColumns;
-        const totalBarsLength = height * columnTotalBarsCount;
-        
-        resultWeight = (totalBarsLength * effectiveW) / 1000;
-        totalBarsCount = columnTotalBarsCount;
-        wastePercent = 0;
+        gridHtml = `
+            <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); color: white;">
+                <h5 style="color: white; opacity: 0.9;">الوزن الإجمالي للأعمدة</h5>
+                <span class="res-value" style="color: white;">${formatNum(resultWeight)}</span>
+                <span class="res-unit" style="color: white;">طن</span>
+            </div>
+            <div class="result-item"><h5>طول الشيش الواحد</h5><span class="res-value">${height.toFixed(2)}</span><span class="res-unit">م</span></div>
+            <div class="result-item"><h5>إجمالي عدد القطع</h5><span class="res-value">${totalBarsCount}</span><span class="res-unit">قطعة</span></div>
+        `;
     }
     else if (mode === '4') {
-        const totalLen = parseFloat(document.getElementById('st4-length').value) || 0;
-        const spacing = parseFloat(document.getElementById('st4-spacing').value) || 0;
-        const b = parseFloat(document.getElementById('st4-b').value) || 0;
-        const h = parseFloat(document.getElementById('st4-h').value) || 0;
-        const c = parseFloat(document.getElementById('st4-cover').value) || 0;
-        const hook = parseFloat(document.getElementById('st4-hook').value) || 0;
+        mainCalcName = "كانات الأعمدة";
+        const totalLen = getVal('st4-length', 0);
+        const spacing = getVal('st4-spacing', 0);
+        const b = getVal('st4-b', 0);
+        const h = getVal('st4-h', 0);
+        const c = getVal('st4-cover', 0);
+        const hook = getVal('st4-hook', 0);
         const sDiam = getVal('st4-dia', 0);
         wastePercent = getVal('st4-waste', 5);
 
         if (spacing > 0) {
-            const stirrupsPieceCount = Math.ceil(totalLen / spacing);
-            const stirrupPerimeterVal = 2 * ((b - c) + (h - c)) + (2 * hook);
-            const totalBarsLength = stirrupsPieceCount * stirrupPerimeterVal;
-            const stdBars = Math.ceil(totalBarsLength / 12);
-            totalBarsCount = stdBars;
-
+            const sCount = Math.ceil(totalLen / spacing);
+            const sPerim = 2 * ((b - 2*c) + (h - 2*c)) + (2 * hook);
+            const totalLenS = sCount * sPerim;
+            const stdBars = Math.ceil(totalLenS / 12);
             const sBarsPerTon = getBarsPerTon(sDiam);
-            if (sBarsPerTon > 0) {
-                resultWeight = stdBars / sBarsPerTon;
-            } else {
-                resultWeight = totalBarsLength * ((sDiam * sDiam) / 162) / 1000;
-            }
+            resultWeight = sBarsPerTon > 0 ? (stdBars / sBarsPerTon) : (totalLenS * getWeightPerM(sDiam) / 1000);
+
+            gridHtml = `
+                <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); color: white;">
+                    <h5 style="color: white; opacity: 0.9;">وزن الكانات مع الهدر</h5>
+                    <span class="res-value" style="color: white;">${formatNum(resultWeight * (1 + wastePercent/100))}</span>
+                    <span class="res-unit" style="color: white;">طن</span>
+                </div>
+                <div class="result-item"><h5>عدد الكانات</h5><span class="res-value">${sCount}</span><span class="res-unit">كانة</span></div>
+                <div class="result-item"><h5>طول الكانة الواحدة</h5><span class="res-value">${sPerim.toFixed(2)}</span><span class="res-unit">م</span></div>
+            `;
         }
     }
 
-    const resultWeightWithWaste = resultWeight * (1 + (wastePercent / 100));
-
-    let finalHtml = `
-        <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); outline: 2px solid white; color: white;">
-            <h5 style="color: white; opacity: 0.9;">الوزن الإجمالي مع الهدر (${wastePercent}%)</h5>
-            <span class="res-value" style="color: white;">${formatNum(resultWeightWithWaste)}</span>
-            <span class="res-unit" style="color: white;">طن</span>
-        </div>
-        <div class="result-item">
-            <h5>الوزن الصافي (بدون هدر)</h5>
-            <span class="res-value">${formatNum(resultWeight)}</span>
-            <span class="res-unit">طن</span>
-        </div>
-        <div class="result-item">
-            <h5>عدد الشياش (12م) أو القطع</h5>
-            <span class="res-value">${formatNum(totalBarsCount)}</span>
-            <span class="res-unit">${mode === '3' ? 'قطعة' : 'شيش'}</span>
-        </div>
-    `;
-
-    document.getElementById('steel-comp-grid').innerHTML = finalHtml + gridHtml;
+    document.getElementById('steel-comp-grid').innerHTML = gridHtml;
     document.getElementById('steel-comp-result').style.display = 'block';
-    saveToHistory("حساب الحديد", finalHtml + gridHtml);
+    saveToHistory(mainCalcName, gridHtml);
 }
 
-/* --- Concrete Calculator --- */
+/* --- Concrete / Quantity Calculator --- */
 function calculateConcrete() {
-    const l = parseFloat(document.getElementById('conc-length').value) || 0;
-    const w = parseFloat(document.getElementById('conc-width').value) || 0;
-    const t = parseFloat(document.getElementById('conc-thick').value) || 0;
+    const l = getVal('conc-length', 0);
+    const w = getVal('conc-width', 0);
+    const t = getVal('conc-thick', 0);
     const rC = getVal('conc-cement-r', 1);
     const rS = getVal('conc-sand-r', 2);
     const rG = getVal('conc-gravel-r', 4);
@@ -1046,6 +1150,384 @@ function calculateBlock() {
     saveToHistory("حساب البلوك", html);
 }
 
+/* --- Mix Design Calculator --- */
+function toggleMixGrade() {
+    const grade = document.getElementById('mix-grade').value;
+    const cInput = document.getElementById('mix-c');
+    const sInput = document.getElementById('mix-s');
+    const gInput = document.getElementById('mix-g');
+    
+    if (grade === 'Custom') {
+        cInput.disabled = false;
+        sInput.disabled = false;
+        gInput.disabled = false;
+        cInput.value = '';
+        sInput.value = '';
+        gInput.value = '';
+    } else {
+        cInput.disabled = true;
+        sInput.disabled = true;
+        gInput.disabled = true;
+        if (grade === 'M10') { cInput.value = 1; sInput.value = 3; gInput.value = 6; }
+        else if (grade === 'M15') { cInput.value = 1; sInput.value = 2; gInput.value = 4; }
+        else if (grade === 'M20') { cInput.value = 1; sInput.value = 1.5; gInput.value = 3; }
+        else if (grade === 'M25') { cInput.value = 1; sInput.value = 1; gInput.value = 2; }
+    }
+    document.getElementById('mix-result').style.display = 'none';
+}
+
+function calculateMixDesign() {
+    const vol = parseFloat(document.getElementById('mix-vol').value) || 0;
+    const waste = getVal('mix-waste', 5);
+    const wcRatio = parseFloat(document.getElementById('mix-wc').value) || 0;
+    
+    const cRatio = parseFloat(document.getElementById('mix-c').value) || 0;
+    const sRatio = parseFloat(document.getElementById('mix-s').value) || 0;
+    const gRatio = parseFloat(document.getElementById('mix-g').value) || 0;
+
+    if (vol <= 0 || cRatio <= 0 || sRatio <= 0 || gRatio <= 0 || wcRatio <= 0) {
+        alert("يرجى التأكد من إدخال جميع النسب والحجم بشكل صحيح.");
+        return;
+    }
+
+    const totalWetVolume = vol * (1 + (waste / 100));
+    const totalDryVolume = totalWetVolume * 1.54;
+    const totalRatio = cRatio + sRatio + gRatio;
+
+    const cementDryVolume = (totalDryVolume * cRatio) / totalRatio;
+    const cementWeight = cementDryVolume * 1440;
+    const cementBags = cementWeight / 50;
+
+    const sandVolume = (totalDryVolume * sRatio) / totalRatio;
+    const gravelVolume = (totalDryVolume * gRatio) / totalRatio;
+    const waterLiters = cementWeight * wcRatio;
+
+    let html = `
+        <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); outline: 2px solid white; color: white;">
+            <h5 style="color: white; opacity: 0.9;">الحجم الكلي مع الهدر</h5>
+            <span class="res-value" style="color: white;">${formatNum(totalWetVolume)}</span>
+            <span class="res-unit" style="color: white;">م³</span>
+        </div>
+        <div class="result-item">
+            <h5>الأسمنت المطلوب</h5>
+            <span class="res-value">${Math.ceil(cementBags)}</span>
+            <span class="res-unit">كيس (50كجم)</span>
+        </div>
+        <div class="result-item">
+            <h5>الرمل المطلوب</h5>
+            <span class="res-value">${formatNum(sandVolume)}</span>
+            <span class="res-unit">م³</span>
+        </div>
+        <div class="result-item">
+            <h5>الحصى (الزلط) المطلوب</h5>
+            <span class="res-value">${formatNum(gravelVolume)}</span>
+            <span class="res-unit">م³</span>
+        </div>
+        <div class="result-item" style="grid-column: 1 / -1;">
+            <h5 style="color: #0284c7;">الماء المطلوب</h5>
+            <span class="res-value" style="color: #0284c7;">${formatNum(waterLiters)}</span>
+            <span class="res-unit" style="color: #0284c7;">لتر</span>
+        </div>
+    `;
+
+    document.getElementById('mix-result-grid').innerHTML = html;
+    document.getElementById('mix-result').style.display = 'block';
+    saveToHistory("تصميم الخلطة الخرسانية", html);
+}
+
+/* --- Rebar Substitution Calculator --- */
+function calculateRebarSub() {
+    const origCount = getVal('rebar-orig-count', 10);
+    const origDia = getVal('rebar-orig-dia', 12);
+    const newDia = getVal('rebar-new-dia', 16);
+    const aggSize = getVal('rebar-agg-size', 20);
+
+    if (origDia <= 0 || newDia <= 0 || origCount <= 0) {
+        alert("أدخل قيم صحيحة للقطر والعدد");
+        return;
+    }
+
+    const limit1 = Math.max(origDia, newDia);
+    const limit2 = 25.0;
+    const limit3 = aggSize * 1.33;
+    const minClearSpacing = Math.max(limit1, limit2, limit3);
+
+    const newCountRaw = origCount * Math.pow(origDia, 2) / Math.pow(newDia, 2);
+    const newCount = Math.ceil(newCountRaw);
+
+    const origArea = origCount * Math.PI * Math.pow(origDia / 2, 2);
+    const newArea = newCount * Math.PI * Math.pow(newDia / 2, 2);
+    const diff = newArea - origArea;
+    const isSafe = diff >= 0;
+
+    let html = `
+        <div class="result-item" style="grid-column: 1 / -1; background: ${isSafe ? '#f0fdf4' : '#fef2f2'}; border-right: 4px solid ${isSafe ? '#16a34a' : '#ef4444'};">
+            <h5 style="color: ${isSafe ? '#16a34a' : '#ef4444'}; font-weight: bold;">الحالة: ${isSafe ? 'آمنة ✓' : 'غير آمنة ⚠️'}</h5>
+            <span style="font-size: 0.9rem; color: ${isSafe ? '#15803d' : '#b91c1c'};">
+                ${isSafe ? 'المقترح آمن والتسليح الجديد يغطي المساحة المطلوبة.' : 'تنبيه: التسليح الجديد غير آمن حيث يعطي مساحة أقل من الأصلية.'}
+            </span>
+        </div>
+        <div class="result-item" style="grid-column: 1 / -1; background: var(--primary); outline: 2px solid white; color: white;">
+            <h5 style="color: white; opacity: 0.9;">العدد المطلوب للقطر الجديد</h5>
+            <span class="res-value" style="color: white;">${newCount}</span>
+            <span class="res-unit" style="color: white;">شيش</span>
+        </div>
+        <div class="result-item" style="background: #fff7ed; border-right: 4px solid #f97316;">
+            <h5 style="color: #c2410c;">أقل مسافة مسموحة</h5>
+            <span class="res-value" style="color: #c2410c;">${formatNum(minClearSpacing)}</span>
+            <span class="res-unit" style="color: #c2410c;">ملم</span>
+        </div>
+        <div class="result-item">
+            <h5>الفرق في المساحة</h5>
+            <span class="res-value" style="color: ${isSafe ? '#16a34a' : '#ef4444'};">${diff > 0 ? '+' : ''}${formatNum(diff)}</span>
+            <span class="res-unit" style="color: ${isSafe ? '#16a34a' : '#ef4444'};">ملم²</span>
+        </div>
+        <div class="result-item">
+            <h5>المساحة الأصلية</h5>
+            <span class="res-value">${formatNum(origArea)}</span>
+            <span class="res-unit">ملم²</span>
+        </div>
+        <div class="result-item">
+            <h5>المساحة الجديدة</h5>
+            <span class="res-value">${formatNum(newArea)}</span>
+            <span class="res-unit">ملم²</span>
+        </div>
+    `;
+
+    document.getElementById('rebar-sub-result-grid').innerHTML = html;
+    document.getElementById('rebar-sub-result').style.display = 'block';
+    saveToHistory("استبدال الأقطار", html);
+}
+
+/* --- Unit Converter --- */
+const units = {
+    length: { 'm': {n:'متر', r:1}, 'cm': {n:'سم', r:0.01}, 'mm': {n:'ملم', r:0.001}, 'km': {n:'كم', r:1000}, 'in': {n:'إنش', r:0.0254}, 'ft': {n:'قدم', r:0.3048}, 'yd': {n:'ياردة', r:0.9144}, 'mi': {n:'ميل', r:1609.34} },
+    area: { 'm2': {n:'متر²', r:1}, 'cm2': {n:'سم²', r:0.0001}, 'ft2': {n:'قدم²', r:0.092903}, 'hectare': {n:'هكتار', r:10000}, 'acre': {n:'فدان', r:4046.86}, 'dunam': {n:'دونم (عراقي)', r:2500} },
+    volume: { 'm3': {n:'متر³', r:1}, 'liter': {n:'لتر', r:0.001}, 'cm3': {n:'سم³', r:0.000001}, 'ft3': {n:'قدم³', r:0.0283168}, 'gallon': {n:'غالون أمريكي', r:0.00378541} },
+    weight: { 'kg': {n:'كغم', r:1}, 'g': {n:'غرام', r:0.001}, 'ton': {n:'طن', r:1000}, 'lb': {n:'باوند', r:0.453592} },
+    pressure: { 'Pa': {n:'باسكال (Pa)', r:1}, 'kPa': {n:'كيلوباسكال (kPa)', r:1000}, 'MPa': {n:'ميغاباسكال (MPa)', r:1000000}, 'bar': {n:'بار', r:100000}, 'psi': {n:'رطل/بوصة² (psi)', r:6894.76} },
+    force: { 'N': {n:'نيوتن', r:1}, 'kN': {n:'كيلونيوتن', r:1000}, 'kgf': {n:'كغم قوة', r:9.80665} }
+};
+
+function toggleConvType() {
+    const type = document.getElementById('conv-type').value;
+    const fromSel = document.getElementById('conv-from');
+    const toSel = document.getElementById('conv-to');
+    
+    let opts = '';
+    for (const [key, val] of Object.entries(units[type])) {
+        opts += `<option value="${key}">${val.n}</option>`;
+    }
+    fromSel.innerHTML = opts;
+    toSel.innerHTML = opts;
+    
+    if (fromSel.options.length > 1) {
+        toSel.selectedIndex = 1;
+    }
+    calculateConversion();
+}
+
+function calculateConversion() {
+    const type = document.getElementById('conv-type').value;
+    const val = getVal('conv-value', 0);
+    const from = document.getElementById('conv-from').value;
+    const to = document.getElementById('conv-to').value;
+    
+    if (!from || !to) return;
+    
+    const baseVal = val * units[type][from].r;
+    const result = baseVal / units[type][to].r;
+    
+    document.getElementById('conv-result-val').textContent = formatNum(result) + ' ' + units[type][to].n;
+    document.getElementById('conv-result').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('conv-type')) toggleConvType();
+});
+
+/* --- Stairs Calculator --- */
+function calculateStairs() {
+    const floorH = getVal('stair-floor-h', 3.2);
+    const targetR = getVal('stair-target-r', 0.16);
+    const targetT = getVal('stair-target-t', 0.30);
+    const stairW = getVal('stair-width', 1.2);
+    const availL = getVal('stair-avail-l', 4.0);
+    const availW = getVal('stair-avail-w', 2.5);
+
+    if (floorH <= 0 || targetR <= 0 || targetT <= 0 || stairW <= 0) {
+        alert("يرجى إدخال جميع الأبعاد بشكل صحيح");
+        return;
+    }
+
+    const totalSteps = Math.round(floorH / targetR);
+    const actualRiser = floorH / totalSteps;
+    const totalRunLength = (totalSteps - 1) * targetT;
+
+    let suggestedType = '';
+    let typeDescription = '';
+
+    if (availL >= totalRunLength && availW >= stairW) {
+        suggestedType = 'درج مستقيم (شحط واحد)';
+        typeDescription = 'المساحة الطولية كافية جداً لعمل الدرج بشكل مستقيم بقلبة واحدة بدون صحن استدارة.';
+    } else if (availW >= (stairW * 2) && availL >= (((totalSteps / 2) - 1) * targetT) + stairW) {
+        suggestedType = 'درج قلبتين (حرف U)';
+        typeDescription = 'المساحة الطولية غير كافية لدرج مستقيم، ولكن العرض كافي لعمل قلبة مزدوجة مع صحن وسطي.';
+    } else if ((availL + availW - stairW) >= totalRunLength) {
+        suggestedType = 'درج زاوية (حرف L)';
+        typeDescription = 'المساحة الأنسب هي عمل درج يستدير بزاوية 90 درجة مع صحن استدارة مربع.';
+    } else {
+        suggestedType = 'درج حلزوني أو إضافة بايات مثلثية';
+        typeDescription = 'المساحة ضيقة جداً للدرج التقليدي. يُنصح بعمل درج حلزوني أو درج بمروحة (بايات مثلثية) لتوفير المساحة.';
+    }
+
+    let html = `
+        <div class="result-grid">
+            <div class="result-item">
+                <h5>عدد الدرجات (البايات)</h5>
+                <span class="res-value">${totalSteps}</span>
+                <span class="res-unit">باية</span>
+            </div>
+            <div class="result-item">
+                <h5>ارتفاع القائمة الفعلي</h5>
+                <span class="res-value">${(actualRiser * 100).toFixed(1)}</span>
+                <span class="res-unit">سم</span>
+            </div>
+            <div class="result-item">
+                <h5>الطول الأفقي الكلي</h5>
+                <span class="res-value">${totalRunLength.toFixed(2)}</span>
+                <span class="res-unit">متر</span>
+            </div>
+        </div>
+        <div style="margin-top: 15px; padding: 15px; background: rgba(33, 150, 243, 0.1); border-radius: 8px;">
+            <h5 style="color: var(--primary); margin-bottom: 5px;">النوع المقترح: ${suggestedType}</h5>
+            <p style="font-size: 0.9rem; color: #555;">${typeDescription}</p>
+        </div>
+    `;
+
+    document.getElementById('stair-result-content').innerHTML = html;
+    document.getElementById('stair-result').style.display = 'block';
+    
+    drawStairDiagram(suggestedType, totalSteps, stairW, totalRunLength);
+    saveToHistory("تصميم الدرج", html);
+}
+
+function drawStairDiagram(type, steps, width, run) {
+    const canvas = document.getElementById('stair-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    
+    const primaryColor = '#0284c7';
+    const dimColor = '#e11d48'; // Red for dimensions
+    
+    ctx.strokeStyle = primaryColor;
+    ctx.lineWidth = 2;
+    ctx.fillStyle = 'rgba(2, 132, 199, 0.05)';
+
+    const drawArrow = (x1, y1, x2, y2) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        // Dot at end
+        ctx.beginPath();
+        ctx.arc(x2, y2, 3, 0, Math.PI * 2);
+        ctx.fillStyle = primaryColor;
+        ctx.fill();
+    };
+
+    const drawDim = (text, x, y, vertical = false) => {
+        ctx.save();
+        ctx.fillStyle = dimColor;
+        ctx.font = 'bold 12px Tajawal, sans-serif';
+        ctx.textAlign = 'center';
+        if (vertical) {
+            ctx.translate(x, y);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(text, 0, 0);
+        } else {
+            ctx.fillText(text, x, y);
+        }
+        ctx.restore();
+    };
+
+    if (type.includes('مستقيم')) {
+        const sw = w * 0.4;
+        const sh = h * 0.8;
+        const x = (w - sw) / 2;
+        const y = (h - sh) / 2;
+        ctx.fillRect(x, y, sw, sh);
+        ctx.strokeRect(x, y, sw, sh);
+        const stepH = sh / steps;
+        for (let i = 1; i < steps; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + i * stepH);
+            ctx.lineTo(x + sw, y + i * stepH);
+            ctx.stroke();
+        }
+        drawArrow(w/2, y + sh - 10, w/2, y + 10);
+        drawDim(run.toFixed(1) + 'm', x - 25, y + sh/2, true);
+        drawDim(width.toFixed(1) + 'm', w/2, y + sh + 15);
+    } else if (type.includes('حرف U')) {
+        const fw = w * 0.3;
+        const fh = h * 0.6;
+        const lh = h * 0.2;
+        const gap = w * 0.1;
+        const x = (w - (fw * 2 + gap)) / 2;
+        const y = h * 0.1;
+        
+        ctx.fillRect(x, y, fw * 2 + gap, lh);
+        ctx.strokeRect(x, y, fw * 2 + gap, lh);
+        ctx.fillRect(x, y + lh, fw, fh);
+        ctx.strokeRect(x, y + lh, fw, fh);
+        ctx.fillRect(x + fw + gap, y + lh, fw, fh);
+        ctx.strokeRect(x + fw + gap, y + lh, fw, fh);
+        
+        drawArrow(x + fw + gap + fw/2, y + lh + fh - 10, x + fw + gap + fw/2, y + lh + 10);
+        drawArrow(x + fw/2, y + lh + 10, x + fw/2, y + lh + fh - 10);
+        
+        drawDim(width.toFixed(1) + 'm', x + fw/2, y - 5);
+        drawDim((run/2).toFixed(1) + 'm', x - 20, y + lh + fh/2, true);
+    } else if (type.includes('حرف L')) {
+        const fw = w * 0.3;
+        const fh1 = h * 0.5;
+        const fh2 = w * 0.5;
+        const x = w * 0.2;
+        const y = h * 0.1;
+        
+        ctx.fillRect(x, y, fw, fh1);
+        ctx.strokeRect(x, y, fw, fh1);
+        ctx.fillRect(x, y + fh1, fw, fw);
+        ctx.strokeRect(x, y + fh1, fw, fw);
+        ctx.fillRect(x + fw, y + fh1, fh2, fw);
+        ctx.strokeRect(x + fw, y + fh1, fh2, fw);
+        
+        drawArrow(x + fw + fh2 - 10, y + fh1 + fw/2, x + fw + 10, y + fh1 + fw/2);
+        drawDim(width.toFixed(1) + 'm', x + fw/2, y - 5);
+        drawDim((run/2).toFixed(1) + 'm', x - 20, y + fh1/2, true);
+    } else {
+        const r = w * 0.35;
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(w / 2, h / 2, r * 0.2, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = 0; i < 8; i++) {
+            const ang = i * Math.PI / 4;
+            ctx.beginPath();
+            ctx.moveTo(w / 2 + Math.cos(ang) * r * 0.2, h / 2 + Math.sin(ang) * r * 0.2);
+            ctx.lineTo(w / 2 + Math.cos(ang) * r, h / 2 + Math.sin(ang) * r);
+            ctx.stroke();
+        }
+        drawDim('حلزوني', w/2, h/2 + r + 15);
+    }
+}
+
 /* --- History Management --- */
 function saveToHistory(calcName, resultText) {
     let history = JSON.parse(localStorage.getItem('civileng_history') || '[]');
@@ -1114,6 +1596,101 @@ document.querySelectorAll('.nav-item').forEach(item => {
     });
 });
 
+/* --- PDF Export Logic --- */
+function exportToPdf(type) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        putOnlyUsedFonts: true
+    });
+
+    // Add Tajawal font (base64 or just use standard if not available, 
+    // but for Arabic we need a font. jsPDF doesn't support Arabic well without a font.
+    // For simplicity, we'll try to use a standard font and hope for the best, 
+    // or tell the user we're using a simplified export if fonts are missing.)
+    
+    doc.setFont("Helvetica"); 
+    doc.setFontSize(22);
+    doc.setTextColor(2, 132, 199); // primary color
+    doc.text("CivilEng Pro Report", 105, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text("Report Generated: " + new Date().toLocaleString(), 105, 28, { align: 'center' });
+    
+    doc.setDrawColor(2, 132, 199);
+    doc.setLineWidth(0.5);
+    doc.line(20, 32, 190, 32);
+
+    let title = "";
+    let data = [];
+    
+    if (type === 'brick') {
+        title = "Brick Calculator Report";
+        const vals = document.querySelectorAll('#brick-result .res-value');
+        data = [
+            ["Item", "Value"],
+            ["Total Bricks", vals[1].textContent],
+            ["Net Volume", vals[4].textContent + " m3"],
+            ["Cement Bags", vals[5].textContent],
+            ["Sand Volume", vals[6].textContent + " m3"]
+        ];
+    } else if (type === 'stairs') {
+        title = "Stairs Design Report";
+        const resDiv = document.getElementById('stair-result-content');
+        const items = resDiv.querySelectorAll('div');
+        data = [["Property", "Value"]];
+        items.forEach(item => {
+            const spans = item.querySelectorAll('span');
+            if (spans.length >= 2) {
+                data.push([spans[0].textContent, spans[1].textContent]);
+            }
+        });
+        
+        // Add Canvas Image if possible
+        const canvas = document.getElementById('stair-canvas');
+        if (canvas) {
+            const imgData = canvas.toDataURL('image/png');
+            doc.addImage(imgData, 'PNG', 55, 120, 100, 100);
+        }
+    } else {
+        title = "Calculation Report";
+        // General extraction from result-grid
+        const activeContainer = document.querySelector('.calculator-container[style*="display: block"]');
+        if (activeContainer) {
+            const grid = activeContainer.querySelector('.result-grid');
+            if (grid) {
+                data = [["Label", "Value"]];
+                grid.querySelectorAll('.result-item').forEach(item => {
+                    const h5 = item.querySelector('h5');
+                    const val = item.querySelector('.res-value');
+                    const unit = item.querySelector('.res-unit');
+                    if (h5 && val) {
+                        data.push([h5.textContent, val.textContent + (unit ? " " + unit.textContent : "")]);
+                    }
+                });
+            }
+        }
+    }
+
+    doc.setFontSize(16);
+    doc.setTextColor(0);
+    doc.text(title, 20, 45);
+
+    doc.autoTable({
+        startY: 50,
+        head: [data[0]],
+        body: data.slice(1),
+        theme: 'striped',
+        headStyles: { fillColor: [2, 132, 199] },
+        styles: { font: "Helvetica", halign: 'left' }
+    });
+
+    doc.save(`CivilEng_${type}_Report.pdf`);
+}
+
 /* --- Multi-Language System (i18n) --- */
 const translations = {
     ar: {
@@ -1129,7 +1706,11 @@ const translations = {
         "menu-theme": "الوضع ليلي/نهاري",
         "dash-welcome": "مرحباً بك في CivilEng Pro",
         "owner-name": "المهندس حسن منذر",
-        "dash-subtitle": "اختر إحدى الحاسبات الهندسية من القائمة الجانبية للبدء بحساب الكميات بدقة عالية."
+        "dash-subtitle": "اختر إحدى الحاسبات الهندسية من القائمة الجانبية للبدء بحساب الكميات بدقة عالية.",
+        "nav-mix-design": "تصميم الخلطة",
+        "nav-rebar-sub": "استبدال الأقطار",
+        "nav-unit-conv": "محول الوحدات",
+        "nav-stairs": "حاسبة السلالم"
     },
     en: {
         "nav-home": "Home",
@@ -1142,9 +1723,11 @@ const translations = {
         "nav-block": "Block Calculator",
         "nav-history": "History Log",
         "menu-theme": "Dark/Light Mode",
-        "dash-welcome": "Welcome to CivilEng Pro",
-        "owner-name": "Eng. Hassan Munther",
-        "dash-subtitle": "Select an engineering calculator from the sidebar to start precise quantity estimation."
+        "dash-subtitle": "Select an engineering calculator from the sidebar to start precise quantity estimation.",
+        "nav-mix-design": "Mix Design",
+        "nav-rebar-sub": "Rebar Substitution",
+        "nav-unit-conv": "Unit Converter",
+        "nav-stairs": "Stairs Calculator"
     },
     ku: {
         "nav-home": "سەرەکی",
@@ -1157,9 +1740,11 @@ const translations = {
         "nav-block": "حاسیبەی بلۆک",
         "nav-history": "تۆماری حسابات",
         "menu-theme": "دۆخی شەو/ڕۆژ",
-        "dash-welcome": "بەخێربێیت بۆ CivilEng Pro",
-        "owner-name": "ئەندازیار حەسەن موندەر",
-        "dash-subtitle": "حاسیبەیەکی ئەندازیاری لە لیستی لاتەنیشت هەڵبژێرە بۆ دەستپێکردنی حسابکردنی بڕەکان."
+        "dash-subtitle": "حاسیبەیەکی ئەندازیاری لە لیستی لاتەنیشت هەڵبژێرە بۆ دەستپێکردنی حسابکردنی بڕەکان.",
+        "nav-mix-design": "تێکەڵەی کۆنکریت",
+        "nav-rebar-sub": "گۆڕینی ئاسن",
+        "nav-unit-conv": "گۆڕینی یەکەکان",
+        "nav-stairs": "حاسیبەی قادرمە"
     }
 };
 

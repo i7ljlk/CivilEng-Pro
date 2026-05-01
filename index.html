@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -41,6 +43,18 @@
                 </a>
                 <a href="#" class="nav-item" data-target="block-calc">
                     <i class="fa-solid fa-cubes-stacked"></i> <span data-i18n="nav-block">حاسبة البلوك</span>
+                </a>
+                <a href="#" class="nav-item" data-target="mix-design-calc">
+                    <i class="fa-solid fa-flask"></i> <span data-i18n="nav-mix-design">تصميم الخلطة</span>
+                </a>
+                <a href="#" class="nav-item" data-target="rebar-sub-calc">
+                    <i class="fa-solid fa-swap-horiz"></i> <span data-i18n="nav-rebar-sub">استبدال الأقطار</span>
+                </a>
+                <a href="#" class="nav-item" data-target="unit-conv-calc">
+                    <i class="fa-solid fa-compare-arrows"></i> <span data-i18n="nav-unit-conv">محول الوحدات</span>
+                </a>
+                <a href="#" class="nav-item" data-target="stairs-calc">
+                    <i class="fa-solid fa-stairs"></i> <span data-i18n="nav-stairs">حاسبة السلالم</span>
                 </a>
                 <a href="#" class="nav-item" data-target="history-calc">
                     <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="nav-history">سجل الحسابات</span>
@@ -87,8 +101,8 @@
                     <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
                         <img src="owner.jpg" alt="المستخدم" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; border: 3px solid var(--primary); box-shadow: var(--shadow);">
                         <div>
-                            <h2 style="margin-bottom: 0.2rem; color: var(--primary);" data-i18n="dash-welcome">مرحباً بك في CivilEng Pro</h2>
-                            <h3 style="color: white; font-weight: 500;" data-i18n="owner-name">المهندس حسن منذر</h3>
+                            <h2 style="margin-bottom: 0.2rem; color: var(--primary);">هذا العمل هدية إلى صاحب الزمان<br>(عجل الله فرجه الشريف)</h2>
+                            <h3 style="color: white; font-weight: 500; font-size: 1.1rem; margin-top: 10px;">ومن استفاد منه، نسأله دعوة طيبة</h3>
                         </div>
                     </div>
                     <p style="color: var(--text-muted); margin-bottom: 2.5rem;" data-i18n="dash-subtitle">اختر إحدى الحاسبات الهندسية من القائمة الجانبية للبدء بحساب الكميات بدقة عالية.</p>
@@ -102,13 +116,25 @@
                             <i class="fa-solid fa-border-all" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
                             <h5>حاسبة السيراميك</h5>
                         </div>
-                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'concrete-calc\']').click()">
-                            <i class="fa-solid fa-truck-monster" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
-                            <h5>حاسبة الخرسانة</h5>
-                        </div>
-                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'steel-calc\']').click()">
+                                       <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'steel-calc\']').click()">
                             <i class="fa-solid fa-link" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
-                            <h5>حاسبة الحديد</h5>
+                            <h5 data-i18n="nav-steel">حاسبة الحديد</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'mix-design-calc\']').click()">
+                            <i class="fa-solid fa-flask" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5 data-i18n="nav-mix-design">تصميم الخلطة</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'rebar-sub-calc\']').click()">
+                            <i class="fa-solid fa-right-left" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5 data-i18n="nav-rebar-sub">استبدال الأقطار</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'unit-conv-calc\']').click()">
+                            <i class="fa-solid fa-balance-scale" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5 data-i18n="nav-unit-conv">محول الوحدات</h5>
+                        </div>
+                        <div class="result-item" style="cursor: pointer;" onclick="document.querySelector('[data-target=\'stairs-calc\']').click()">
+                            <i class="fa-solid fa-stairs" style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h5 data-i18n="nav-stairs">حاسبة السلالم</h5>
                         </div>
                     </div>
 
@@ -131,6 +157,10 @@
                         <select id="brick-sub-mode" onchange="toggleBrickSubMode()">
                             <option value="wall">حساب جدار واحد</option>
                             <option value="room">حساب غرفة كاملة</option>
+                            <option value="half_circle">حساب جدار نصف دائرة</option>
+                            <option value="quarter_circle">حساب جدار ربع دائرة</option>
+                            <option value="total_lengths">حساب مجموع أطوال</option>
+                            <option value="volume">حساب حجم معلوم</option>
                         </select>
                     </div>
 
@@ -171,7 +201,11 @@
                             <label>عرض الغرفة (م)</label>
                             <input type="number" id="brick-room-w" value="4">
                         </div>
-                        <div class="input-group">
+                        <div class="input-group" id="grp-brick-vol" style="display: none;">
+                            <label>الحجم الإجمالي للبناء (م³)</label>
+                            <input type="number" id="brick-vol" placeholder="مثال: 25">
+                        </div>
+                        <div class="input-group" id="grp-brick-wall-l">
                             <label id="lbl-brick-length">طول الجدار (م)</label>
                             <input type="number" id="brick-wall-l" value="5">
                         </div>
@@ -230,7 +264,10 @@
                         <input type="number" id="brick-openings-extra" value="0">
                     </div>
 
-                    <button class="btn-primary" onclick="calculateBrick()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                        <button class="btn-primary" onclick="calculateBrick()" style="flex: 1;">احسب الكمية <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('brick')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
                     
                     <div class="result-box" id="brick-result" style="display: none;">
                         <h4>النتائج</h4>
@@ -342,7 +379,10 @@
                         <span style="font-size: 0.9rem; color: #2196f3;">ملاحظة: سمك المفصل يضاف تلقائياً لحجم البلاطة عند الحساب.</span>
                     </div>
 
-                    <button class="btn-primary" onclick="calculateCeramic()">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateCeramic()" style="flex: 1;">احسب الكمية <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('ceramic')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
                     
                     <div class="result-box" id="ceramic-result" style="display: none;">
                         <h4>النتائج</h4>
@@ -475,7 +515,10 @@
                         </div>
                     </div>
 
-                    <button class="btn-primary" onclick="calculatePlaster()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                        <button class="btn-primary" onclick="calculatePlaster()" style="flex: 1;">احسب الكمية <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('plaster')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
                     
                     <div class="result-box" id="plaster-result" style="display: none;">
                         <h4>النتائج</h4>
@@ -558,7 +601,10 @@
                         </div>
                     </div>
 
-                    <button class="btn-primary" onclick="calculateExcavation()" style="margin-top: 1.5rem;">احسب الكمية <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                        <button class="btn-primary" onclick="calculateExcavation()" style="flex: 1;">احسب الكمية <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('excavation')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
                     
                     <div class="result-box" id="excavation-result" style="display: none;">
                         <h4>النتائج</h4>
@@ -622,6 +668,14 @@
                             <div class="input-group">
                                 <label>نسبة الهدر (%)</label>
                                 <input type="number" id="st1-waste" value="5" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label>نوع المشروع (لتسليح عوارض الحصيري)</label>
+                                <select id="st1-project-type">
+                                    <option value="light">مشروع خفيف (0.333)</option>
+                                    <option value="normal">مشروع طبيعي (0.35)</option>
+                                    <option value="heavy">مشروع ثقيل (0.50)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -706,7 +760,10 @@
                          </div>
                     </div>
 
-                    <button class="btn-primary" onclick="calculateSteelComprehensive()">احسب الحديد <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateSteelComprehensive()" style="flex: 1;">احسب الحديد <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('steel')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
 
                     <div class="result-box" id="steel-comp-result" style="display: none;">
                         <h4>النتائج الإجمالية والنهائية</h4>
@@ -757,7 +814,10 @@
                         </div>
                     </div>
 
-                    <button class="btn-primary" onclick="calculateConcrete()">احسب الكميات الخرسانية <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateConcrete()" style="flex: 1;">احسب الكميات الخرسانية <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('concrete')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
 
                     <div class="result-box" id="concrete-result" style="display: none;">
                         <h4>نتائج تحليل الخرسانة</h4>
@@ -865,7 +925,10 @@
                         <span style="font-size: 0.9rem; color: #2196f3;">ملاحظة: يتم استبعاد المساحات المفتوحة من مساحة البلوك الإجمالية.</span>
                     </div>
 
-                    <button class="btn-primary" onclick="calculateBlock()">احسب البلوك <i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateBlock()" style="flex: 1;">احسب البلوك <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('block')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
 
                     <div class="result-box" id="block-result" style="display: none;">
                         <h4>النتائج</h4>
@@ -877,6 +940,187 @@
             </div>
 
 
+
+            <!-- Mix Design Calculator -->
+            <div class="calculator-container" id="mix-design-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-flask"></i> حاسبة تصميم الخلطة الخرسانية</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الحجم المطلوب (م³)</label>
+                            <input type="number" id="mix-vol" placeholder="مثال: 10">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الهدر (%)</label>
+                            <input type="number" id="mix-waste" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label>خصائص الخلطة</label>
+                            <select id="mix-grade" onchange="toggleMixGrade()">
+                                <option value="M15">M15 (1:2:4)</option>
+                                <option value="M10">M10 (1:3:6)</option>
+                                <option value="M20">M20 (1:1.5:3)</option>
+                                <option value="M25">M25 (1:1:2)</option>
+                                <option value="Custom">مخصص (Custom)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الماء للإسمنت (W/C)</label>
+                            <input type="number" id="mix-wc" value="0.5" step="0.05">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الإسمنت</label>
+                            <input type="number" id="mix-c" value="1" disabled>
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الرمل</label>
+                            <input type="number" id="mix-s" value="2" disabled>
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الحصى</label>
+                            <input type="number" id="mix-g" value="4" disabled>
+                        </div>
+                    </div>
+                    <div style="background: rgba(33, 150, 243, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; margin-top: 1rem;">
+                        <i class="fa-solid fa-circle-info" style="color: #2196f3;"></i>
+                        <span style="font-size: 0.9rem; color: #2196f3;">ملاحظة: يتم حساب الحجم الجاف بضرب الحجم الرطب بـ 1.54.</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateMixDesign()" style="flex: 1;">احسب الخلطة <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('mix')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
+                    <div class="result-box" id="mix-result" style="display: none;">
+                        <h4>النتائج</h4>
+                        <div class="result-grid" id="mix-result-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rebar Substitution Calculator -->
+            <div class="calculator-container" id="rebar-sub-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-right-left"></i> حاسبة استبدال أقطار الشيش</h3>
+                    
+                    <div style="background: rgba(243, 156, 18, 0.1); border-right: 4px solid #f39c12; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <h5 style="color: #d35400; margin-bottom: 0.5rem;"><i class="fa-solid fa-triangle-exclamation"></i> ملاحظات هامة:</h5>
+                        <ul style="color: #e67e22; font-size: 0.85rem; padding-right: 1.2rem; margin: 0; line-height: 1.6;">
+                            <li>لا تنجح هذه الطريقة دائماً، لذا يجب أخذ موافقة المهندس الاستشاري.</li>
+                            <li>يجب أن لا يكون فرق القطر الجديد عن القديم بأكثر من نمرة واحدة.</li>
+                            <li>لا تنجح هذه الطريقة دائماً لأنه قد يختلف إجهاد الخضوع من قطر إلى آخر.</li>
+                        </ul>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>العدد الأصلي في المخطط (للمتر)</label>
+                            <input type="number" id="rebar-orig-count" value="10">
+                        </div>
+                        <div class="input-group">
+                            <label>القطر الأصلي في المخطط (ملم)</label>
+                            <input type="number" id="rebar-orig-dia" value="12">
+                        </div>
+                        <div class="input-group">
+                            <label>القطر المتوفر المطلوب استخدامه (ملم)</label>
+                            <input type="number" id="rebar-new-dia" value="16">
+                        </div>
+                        <div class="input-group">
+                            <label>أكبر مقاس للحصى (ملم)</label>
+                            <input type="number" id="rebar-agg-size" value="20">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                        <button class="btn-primary" onclick="calculateRebarSub()" style="flex: 1;">احسب الاستبدال <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('rebar_sub')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
+                    <div class="result-box" id="rebar-sub-result" style="display: none;">
+                        <h4>نتائج الاستبدال</h4>
+                        <div class="result-grid" id="rebar-sub-result-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unit Converter Calculator -->
+            <div class="calculator-container" id="unit-conv-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-balance-scale"></i> محول الوحدات</h3>
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label>نوع القياس</label>
+                        <select id="conv-type" onchange="toggleConvType()">
+                            <option value="length">الأطوال (Length)</option>
+                            <option value="area">المساحات (Area)</option>
+                            <option value="volume">الحجوم (Volume)</option>
+                            <option value="weight">الأوزان (Mass)</option>
+                            <option value="pressure">الضغط والإجهاد (Pressure)</option>
+                            <option value="force">القوة (Force)</option>
+                        </select>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>القيمة</label>
+                            <input type="number" id="conv-value" value="1" oninput="calculateConversion()">
+                        </div>
+                        <div class="input-group">
+                            <label>من وحدة</label>
+                            <select id="conv-from" onchange="calculateConversion()"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>إلى وحدة</label>
+                            <select id="conv-to" onchange="calculateConversion()"></select>
+                        </div>
+                    </div>
+                    <div class="result-box" id="conv-result" style="display: none; background: var(--primary); color: white;">
+                        <h4>النتيجة: <span id="conv-result-val" style="font-size: 1.5rem; font-weight: bold; margin-right: 15px;"></span></h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stairs Calculator -->
+            <div class="calculator-container" id="stairs-calc" style="display: none;">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-stairs"></i> حاسبة تخطيط وتصميم الدرج</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الارتفاع الكلي للطابق (م)</label>
+                            <input type="number" id="stair-floor-h" value="3.2" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>ارتفاع القائمة المفضل (م)</label>
+                            <input type="number" id="stair-target-r" value="0.16" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>عمق النايمة المفضل (م)</label>
+                            <input type="number" id="stair-target-t" value="0.30" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>عرض قلبة الدرج (م)</label>
+                            <input type="number" id="stair-width" value="1.2" step="0.1">
+                        </div>
+                    </div>
+                    <h4 style="color: var(--primary); margin-top: 1.5rem;">المساحة المتوفرة (بيت الدرج):</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>الطول المتوفر (م)</label>
+                            <input type="number" id="stair-avail-l" value="4.0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>العرض المتوفر (م)</label>
+                            <input type="number" id="stair-avail-w" value="2.5" step="0.1">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                        <button class="btn-primary" onclick="calculateStairs()" style="flex: 1;">احسب واقترح التصميم <i class="fa-solid fa-calculator"></i></button>
+                        <button class="btn-primary" onclick="exportToPdf('stairs')" style="background: #e74c3c; width: 60px;"><i class="fa-solid fa-file-pdf"></i></button>
+                    </div>
+                    
+                    <div class="result-box" id="stair-result" style="display: none;">
+                        <h4>النتائج والتوصيات</h4>
+                        <div id="stair-result-content"></div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <h5 style="margin-bottom: 10px;">رسم توضيحي (تقريبي)</h5>
+                            <canvas id="stair-canvas" width="300" height="300" style="background: white; border: 1px solid #ddd; border-radius: 8px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- History Section -->
             <div class="calculator-container" id="history-calc" style="display: none;">
